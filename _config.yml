@@ -1,0 +1,15 @@
+# Site settings
+title: Fictional Memory
+email: kirk.shoop@gmail.com
+description: > # this means to ignore newlines until "baseurl:"
+  an intersection of C++ and Win32
+baseurl: "" # the subpath of your site, e.g. /blog/
+url: "http://kirkshoop.github.io" # the base hostname & protocol for your site
+twitter_username: kirkshoop
+github_username:  kirkshoop
+
+# Build settings
+markdown: redcarpet
+redcarpet:
+  extensions: ["no_intra_emphasis", "fenced_code_blocks", "autolink", "tables", "strikethrough", "superscript", "with_toc_data"]
+

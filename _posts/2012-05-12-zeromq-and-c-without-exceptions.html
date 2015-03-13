@@ -1,0 +1,14 @@
+---
+layout: post
+title: ZeroMQ and C++ without exceptions
+date: '2012-05-12T09:33:00.001-07:00'
+author: Kirk
+tags:
+- error handling
+- programming
+modified_time: '2012-05-13T23:03:03.899-07:00'
+blogger_id: tag:blogger.com,1999:blog-7018293688983612487.post-3280117752815366282
+blogger_orig_url: http://kirkshoop.blogspot.com/2012/05/zeromq-and-c-without-exceptions.html
+---
+
+<p><a href="http://www.250bpm.com/blog:4/comments/show#post-1446345">my comment</a> in reply to martin_sustrik. </p>  <p>I wanted to post some code into the comment but I finally gave up. I will post it here instead. Disclaimer: this code has not been compiled. </p><pre class="prettyprint lang-cpp"><br />class foo<br />{<br />public:<br />  ~foo() {}<br />  foo(foo&amp;&amp; other) {<br />    guts.a = std::move(other.a); // no-fail<br />  }<br />  foo&amp; operator=(foo other) { // no-fail<br />    using std::swap; <br />    swap(guts.a, other.guts.a); <br />    return *this;<br />  } <br />  static optional&lt;foo&gt; init() {<br />    optional&lt;foo&gt; result; <br />    type guts = {}; // ~type() cleans up on exit<br />    guts.a.reset(new(std::nothrow) int(5));<br />    if (!guts.a) {return result;} // no foo constructed <br />    result.reset(foo(guts)); //no-fail move construction<br />    return std::move(result); // no-fail move of result<br />  }<br />  int do() {return guts.a.get();} // a cannot be empty<br />private:<br />  struct type { std::unique_ptr&lt;int&gt; a; };<br />  type guts;<br />  foo(); // disabled<br />  foo(const foo&amp;); // disabled<br />  foo(type&amp;&amp; gutsArg) {guts.a = std::move(gutsArg.a);} // no-fail<br />};<br /><br />auto MyFoo = foo::init();<br />if (!MyFoo) return;<br />MyFoo-&gt;do();<br /></pre><p>if you want to return a detailed error from <code class="prettyprint lang-cpp">init()</code> change <code class="prettyprint lang-cpp">init()</code> to return a tuple: <pre class="prettyprint lang-cpp"><br />  static std::tuple&lt;error, optional&lt;foo&gt;&gt; init();<br /></pre>and use tie to break the result into local vars: <pre class="prettyprint lang-cpp"><br />  optional&lt;foo&gt; MyFoo;<br />  error MyError;<br />  std::tie(MyError, MyFoo) = foo::init();<br /></pre></p>

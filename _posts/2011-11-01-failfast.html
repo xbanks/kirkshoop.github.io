@@ -1,0 +1,15 @@
+---
+layout: post
+title: FAIL_FAST
+date: '2011-11-01T10:00:00.000-07:00'
+author: Kirk
+tags:
+- win32
+- error handling
+- programming
+modified_time: '2011-11-01T10:00:06.323-07:00'
+blogger_id: tag:blogger.com,1999:blog-7018293688983612487.post-2481369715084545104
+blogger_orig_url: http://kirkshoop.blogspot.com/2011/11/failfast.html
+---
+
+<p>In Windows 7 an new weapon in the fight against bugs was released in the form of <a href="http://msdn.microsoft.com/en-us/library/windows/desktop/dd941688.aspx"><code class="prettyprint lang-cpp">RaiseFailFastException</code></a></p><p>In a world where Windows Error Reporting (WER) collects each crash and reports it with a minidump. <code class="prettyprint lang-cpp">FAIL_FAST</code> is essential to finding and fixing bugs quickly. Instead of laboring for a repro, just open the minidump and it points to the line of code that failed and usually has enough state to determine the cause.</p><p><code class="prettyprint lang-cpp">FAIL_FAST</code> should be used to report bugs in code. Transient or environmental failures like no-memory or access-denied are not suited for reporting via <code class="prettyprint lang-cpp">FAIL_FAST</code>, rather things like 'I do not understand this enum value' or 'I did not expect this error value'</p><pre class="prettyprint lang-cpp"><br />#define FAIL_FAST_FILTER() \<br />  __except(FailFastFilter(GetExceptionInformation())) \<br />  { \<br />  } do {} while(0,0)<br /><br />inline<br />LONG WINAPI FailFastFilter(<br />  __in  struct _EXCEPTION_POINTERS* exceptionInfo)<br />{<br />  RaiseFailFastException(<br />    exceptionInfo - &gt; ExceptionRecord,<br />    exceptionInfo - &gt; ContextRecord,<br />    0);<br />  return EXCEPTION_CONTINUE_SEARCH;<br />}<br /><br />template&lt;typename Function&gt;<br />auto FailFastOnThrow(<br />  Function &amp;&amp; function) -&gt; decltype(<br />      std::forward&lt;Function&gt;(function)())<br />{<br />  //<br />  // __ try must be isolated in its own<br />  // function in order for the compiler<br />  // to reason about C++ unwind in the<br />  // calling and called functions.<br />  //<br />  __try {<br />    return std::forward &lt;Function &gt;(function)();<br />  }<br />  FAIL_FAST_FILTER();<br />}<br /><br />#define FAIL_FAST_ON_THROW(Function) \<br />  FailFastOnThrow((Function))<br /><br />#define FAIL_FAST(Code) \<br />  FAIL_FAST_ON_THROW(<br />    [&amp;]{ \<br />      RaiseException( \<br />        (Code), \<br />        EXCEPTION_NONCONTINUABLE, \<br />        0, \<br />        nullptr \<br />      ); \<br />    } \<br />  )<br /></pre>

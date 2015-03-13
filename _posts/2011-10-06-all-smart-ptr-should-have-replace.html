@@ -1,0 +1,13 @@
+---
+layout: post
+title: all smart ptr's should have a replace method
+date: '2011-10-06T10:00:00.000-07:00'
+author: Kirk
+tags:
+- programming
+modified_time: '2011-10-06T10:00:03.024-07:00'
+blogger_id: tag:blogger.com,1999:blog-7018293688983612487.post-7100293194023628510
+blogger_orig_url: http://kirkshoop.blogspot.com/2011/10/all-smart-ptr-should-have-replace.html
+---
+
+<p>A lot of C++ code ends up interfacing with C functions. std::vector and std::basic_string have been constructed to make it possible to use them with c functions (basic_string::c_str vector::data and vector::operator[]) </p><p>Smart pointers, however do not interface well with c code. I believe that c function interfacing is unsupported due to concern that address() is too dangerous to expose. While interfacing with c code does require the same return value that address would return, it does not require the same semantics. </p><p>The implementation of replace() would call reset() and then return address(). This would mean that the user could not accidentally leak a pointer by using replace() </p><p>Here is some code that shows how std::unique_ptr interacts with a c function now and how it would work if it had replace(). </p><pre class="prettyprint lang-cpp"><br />struct CoTask_deleter {<br />  void operator()(void* expired) {<br />    CoTaskMemFree(expired);<br />  }<br />};<br /><br />unique_hresult hresult;<br /><br />{<br />  //<br />  // without replace<br />  //<br />  LPOLESTR rawString = nullptr;<br />  std::unique_ptr&lt;OLECHAR, CoTask_deleter&gt; string;<br />  hresult.reset(StringFromCLSID(GUID_NULL, &amp;rawString));<br />  // memory allocation is not 'owned'<br />  // any mistake from here through the<br />  // unique_ptr reset will result in a<br />  // leak<br />  if (hresult.ok()) {<br />    string.reset(raw_string);<br />    raw_string = nullptr;<br />    // now the memory is safely owned<br />  }<br />}<br /><br />{<br />  //<br />  // with replace<br />  //<br />  std::unique_ptr&lt;OLECHAR, CoTask_deleter&gt; string;<br />  hresult.reset(<br />    StringFromCLSID(<br />        GUID_NULL,<br />        string.replace()));<br />  // there is no point when the memory is not owned<br />}<br /><br />if (!hresult)<br />{<br />  return;<br />}<br /></pre>

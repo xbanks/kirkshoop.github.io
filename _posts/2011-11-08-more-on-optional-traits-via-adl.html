@@ -1,0 +1,13 @@
+---
+layout: post
+title: more on optional traits via ADL
+date: '2011-11-08T10:00:00.000-08:00'
+author: Kirk
+tags:
+- programming
+modified_time: '2011-11-08T10:05:31.116-08:00'
+blogger_id: tag:blogger.com,1999:blog-7018293688983612487.post-6647641337901035319
+blogger_orig_url: http://kirkshoop.blogspot.com/2011/10/more-on-optional-traits-via-adl.html
+---
+
+I posted earlier about a way to provide optional functionality through traits. I used operator [] as the example. As I have been using the library I found some issues with that approach. The main issue was that operator[] is not a template method, being on a templates class is not enough. This meant that using SFINAE to remove the function entirely when the trait was not specified was not possible. Another issue was that some compilers would complain if auto was used on free-functions. These are both addressed now, here is the latest. <br /><pre class="prettyprint linenums lang-cpp"><br />template&lt;typename TypeTag, typename ResourceType&gt;<br />decltype(unique_t_at(<br />    instance_of&lt;ResourceType&gt;::value,<br />    instance_of&lt;size_t&gt;::value,<br />    TypeTag()))<br />optional_unique_t_at(<br />  ResourceType &amp;&amp; resource,<br />  size_t index,<br />  int)<br />{<br />  return unique_t_at(<br />      std::forward&lt;ResourceType&gt;(resource),<br />      index,<br />      TypeTag());<br />}<br /><br />struct no_indexing_support {};<br /><br />template&lt;typename TypeTag&gt;<br />no_indexing_support<br />optional_unique_t_at(...)<br />{<br />  return no_indexing_support();<br />}<br /><br />template&lt;typename TypeTag&gt;<br />class unique_t {<br />private:<br />  typedef<br />  decltype(optional_unique_t_at&lt;TypeTag&gt;(<br />    instance_of&lt;type&gt;::value,<br />    instance_of&lt;size_t&gt;::value,<br />    0))<br />  optional_at_result;<br />public:<br />  ...<br />  optional_at_result operator[](<br />    size_t at) {<br />    return optional_unique_t_at&lt;TypeTag&gt;(<br />      t,<br />      at,<br />      0);<br />  }<br />private:<br />  type t;<br />};<br /></pre><br />Lines 1-24 take care of routing to the trait implementation, when it exists, and a default that provides a suitable error when used. The auto keyword is not used, as a consequence we cannot use the parameters and must synthesize the values used in the decltype. These free-functions are templates and are therefore able to use SFINAE. Here we can see most of the adjustments that were needed to get optional traits working.
