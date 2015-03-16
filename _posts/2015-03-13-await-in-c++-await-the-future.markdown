@@ -2,7 +2,7 @@
 layout: post
 title:  "await in c++ - await the future"
 date:   2015-03-13 11:00:00
-categories: async rxcpp await c++
+categories: [async, rxcpp, await, c++,]
 ---
 
 I will start with the sleep_for example from Gor's presentation ([PDF](https://github.com/CppCon/CppCon2014/blob/master/Presentations/await%202.0%20-%20Stackless%20Resumable%20Functions/await%202.0%20-%20Stackless%20Resumable%20Functions%20-%20Gor%20Nishanov%20-%20CppCon%202014.pdf), [YouTube](https://www.youtube.com/watch?v=KUhSjfSbINE)). The schedule function is a small extension that adds a lambda that can return a value once the time arrives. The schedule fucntion implements the Awaitable Concept on its return type `awaiter` via the  `await_ready`, `await_suspend` and `await_resume` functions.

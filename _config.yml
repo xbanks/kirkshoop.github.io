@@ -14,10 +14,15 @@ redcarpet:
   extensions: ["no_intra_emphasis", "fenced_code_blocks", "autolink", "tables", "strikethrough", "superscript", "with_toc_data"]
 
 gems:
-  - jekyll-plantuml
+  - jekyll-mentions
+  - jemoji
+  - jekyll-redirect-from
+  - jekyll-sitemap
 
 plantuml:
   plantuml_jar: _bin/plantuml.jar     # path to plantuml jar
   tmp_folder: _plantuml               # tmp folder to put generated image files
   #dot_exe: c:/graphviz/bin/dot.exe    # [optional] path to Graphviz dot execution
   background_color: white             # [optional] UML image background color
+
+exclude: ['Gemfile', 'Gemfile.lock', 'Rakefile', 'README.md']

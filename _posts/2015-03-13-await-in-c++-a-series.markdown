@@ -2,7 +2,7 @@
 layout: post
 title:  "await in c++ - a series"
 date:   2015-03-13 3:09:00
-categories: async rxcpp await c++
+categories: [async, rxcpp, await, c++,]
 ---
 
 ## Introduction
