@@ -148,7 +148,7 @@ The call to `schedule_test()` in `wmain()` returns a `std::future<T>` and the `.
   4324 - schedule_test - answer = 42
   8068 - main - answer = 42
 ```
-Notice that `schedule_test()` is running on two different threads because it returned after calling `CreateThreadpoolTimer()` and then was resumed by `TimerCallback()`. The complexity that the compiler is hiding makes the code much cleaner, but does not allow the user to ignore threads. For example, adding a `std::unique_lock<std::mutex>` to `schedule_test()` would lock in `8068` and unlock in `4324`. This is illegal usage.
+Notice that `schedule_test()` is running on two different threads because it returned after calling `CreateThreadpoolTimer()` and then was resumed by `TimerCallback()`. The complexity that the compiler is hiding makes the code much cleaner, but does not allow the user to ignore threads. For example, adding a `std::unique_lock<std::mutex>` to `schedule_test()` would lock in `8068` and unlock in `4324`.
 
 Libraries that provide safe and efficient algorithms that compose with the await proposal are needed as much as the algorithms in the existing STL and the proposed RangeV3 libraries. I will show some options for these in subsequent posts.
 
