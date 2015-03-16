@@ -35,6 +35,7 @@ This looks similar to [Eric Niebler's](https://twitter.com/ericniebler) Range pr
 ## Types in Time
 Time is what the await proposal introduces into the C++ language.
 This is a table of types that represent each combination of values and time.
+
  | Value | Sequence 
 --------|----------|------------- 
 past | `T` | `vector<T>`

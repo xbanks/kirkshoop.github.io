@@ -5,7 +5,7 @@ date:   2015-03-13 11:00:00
 categories: async rxcpp await c++
 ---
 
-I will start with this simple example from Gor's presentation ([PDF](https://github.com/CppCon/CppCon2014/blob/master/Presentations/await%202.0%20-%20Stackless%20Resumable%20Functions/await%202.0%20-%20Stackless%20Resumable%20Functions%20-%20Gor%20Nishanov%20-%20CppCon%202014.pdf), [YouTube](https://www.youtube.com/watch?v=KUhSjfSbINE)):
+I will start with the sleep_for example from Gor's presentation ([PDF](https://github.com/CppCon/CppCon2014/blob/master/Presentations/await%202.0%20-%20Stackless%20Resumable%20Functions/await%202.0%20-%20Stackless%20Resumable%20Functions%20-%20Gor%20Nishanov%20-%20CppCon%202014.pdf), [YouTube](https://www.youtube.com/watch?v=KUhSjfSbINE)). The schedule function is a small extension that adds a lambda that can return a value once the time arrives. The schedule fucntion implements the Awaitable Concept on its return type `awaiter` via the  `await_ready`, `await_suspend` and `await_resume` functions.
 
 ```cpp
 // await.cpp : Defines the entry point for the console application.
@@ -95,7 +95,49 @@ int wmain() {
 }
 ```
 
-The await keyword connects the return type of `schedule_test()` (`std::future<T>`) to the return type of `schedule()` (`awaiter`). The compiler makes all the calls to `await_ready`, `await_suspend`, `await_resume` and `set_result`.
+### diagram
+
+{% plantuml %}
+"caller" -> "schedule_test()" 
+"schedule_test()" -> "promise<int>": "promise<int>()"
+"schedule_test()" -> "promise<int>": "get_return_object()"
+"promise<int>" -> "future<int>"
+"schedule_test()" <-- "promise<int>": "future<int>()"
+"schedule_test()" -> "promise<int>": "await initial_suspend()"
+"schedule_test()" <-- "promise<int>": "suspend_never()"
+"schedule_test()" -> "suspend_never": "await_ready"
+"schedule_test()" <-- "suspend_never": "true"
+"schedule_test()" -> "suspend_never": "await_resume"
+"schedule_test()" -> "suspend_never": "~suspend_never()"
+"schedule_test()" -> "promise<int>": "cancellation_requested()"
+"schedule_test()" -> "schedule()": "await schedule(. . .)"
+"schedule_test()" <-- "schedule()": "schedule::awaiter()"
+"schedule_test()" -> "schedule::awaiter": "await_ready"
+"schedule_test()" <-- "schedule::awaiter": "false"
+"schedule_test()" -> "schedule::awaiter": "await_suspend(resumable_handle)"
+"schedule::awaiter" -> "os": "CreateThreadpoolTimer()"
+"caller" <-- "schedule_test()": "return future<int>"
+"caller" -> "future<int>" : "get()"
+"schedule::awaiter" <-- "os": "TimerCallback()"
+"schedule_test()" <-- "schedule::awaiter": "resumable_handle"
+"schedule_test()" -> "schedule::awaiter": "cancellation_requested()"
+"schedule_test()" -> "schedule::awaiter": "await_resume"
+"promise<int>"  <-- "schedule_test()": "set_result()"
+"caller" <-- "future<int>" 
+"schedule_test()" -> "promise<int>": "await final_suspend()"
+"schedule_test()" <-- "promise<int>": "suspend_never()"
+"schedule_test()" -> "suspend_never": "await_ready"
+"schedule_test()" <-- "suspend_never": "true"
+"schedule_test()" -> "suspend_never": "await_resume"
+"schedule_test()" -> "suspend_never": "~suspend_never()"
+"schedule_test()" -> "schedule::awaiter": "~awaiter()"
+"schedule_test()" -> "promise<int>": "~promise()"
+"caller" -> "future<int>": "~future()" 
+{% endplantuml %}
+
+The `schedule_test()` function uses `await` and `return` to stitch the `std::future<T>` return type to the `awaiter` returned by `schedule()`. The compiler creates `resumable_traits<std::future<int>>::promise_type`, which is `std::promise<int>`, gets the `future<int>` from the promise, calls `awaiter::await_ready` and `awaiter::await_suspend` and returns the empty future. Once the TimerCallback resumes the `await` the compiler calls `awaiter::await_resume` to get the result of the lambda and then, when `return` is reached, `std::promise<int>::set_result()`.
+
+The call to `schedule_test()` in `wmain()` returns a `std::future<T>` and the `.get()` call blocks until the answer is available. Since `wmain()` can only return void or int `await` cannot be used.
 
 ### output
 ```sh
