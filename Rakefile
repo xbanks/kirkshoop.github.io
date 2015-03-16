@@ -6,6 +6,12 @@ require 'yaml'
 require 'tmpdir'
 require 'jekyll'
 
+desc "Serve blog locally http://localhost:4000"
+task :serve do
+    system "git checkout source"
+    system "bundle exec jekyll serve --watch --drafts"
+end
+
 desc "Generate blog files"
 task :generate do
   Jekyll::Site.new(Jekyll.configuration({
