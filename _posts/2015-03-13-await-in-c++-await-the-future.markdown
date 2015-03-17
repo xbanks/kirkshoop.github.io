@@ -103,12 +103,14 @@ int wmain() {
 "schedule_test()" -> "promise<int>": "get_return_object()"
 "promise<int>" -> "future<int>"
 "schedule_test()" <-- "promise<int>": "future<int>()"
-"schedule_test()" -> "promise<int>": "await initial_suspend()"
-"schedule_test()" <-- "promise<int>": "suspend_never()"
-"schedule_test()" -> "suspend_never": "await_ready"
-"schedule_test()" <-- "suspend_never": "true"
-"schedule_test()" -> "suspend_never": "await_resume"
-"schedule_test()" -> "suspend_never": "~suspend_never()"
+group initial
+  "schedule_test()" -> "promise<int>": "await initial_suspend()"
+  "schedule_test()" <-- "promise<int>": "suspend_never()"
+  "schedule_test()" -> "suspend_never": "await_ready"
+  "schedule_test()" <-- "suspend_never": "true"
+  "schedule_test()" -> "suspend_never": "await_resume"
+  "schedule_test()" -> "suspend_never": "~suspend_never()"
+end
 "schedule_test()" -> "promise<int>": "cancellation_requested()"
 "schedule_test()" -> "schedule()": "await schedule(. . .)"
 "schedule_test()" <-- "schedule()": "schedule::awaiter()"
@@ -118,18 +120,21 @@ int wmain() {
 "schedule::awaiter" -> "os": "CreateThreadpoolTimer()"
 "caller" <-- "schedule_test()": "return future<int>"
 "caller" -> "future<int>" : "get()"
+... one second later ...
 "schedule::awaiter" <-- "os": "TimerCallback()"
 "schedule_test()" <-- "schedule::awaiter": "resumable_handle"
 "schedule_test()" -> "schedule::awaiter": "cancellation_requested()"
 "schedule_test()" -> "schedule::awaiter": "await_resume"
 "promise<int>"  <-- "schedule_test()": "set_result()"
 "caller" <-- "future<int>" 
-"schedule_test()" -> "promise<int>": "await final_suspend()"
-"schedule_test()" <-- "promise<int>": "suspend_never()"
-"schedule_test()" -> "suspend_never": "await_ready"
-"schedule_test()" <-- "suspend_never": "true"
-"schedule_test()" -> "suspend_never": "await_resume"
-"schedule_test()" -> "suspend_never": "~suspend_never()"
+group final
+  "schedule_test()" -> "promise<int>": "await final_suspend()"
+  "schedule_test()" <-- "promise<int>": "suspend_never()"
+  "schedule_test()" -> "suspend_never": "await_ready"
+  "schedule_test()" <-- "suspend_never": "true"
+  "schedule_test()" -> "suspend_never": "await_resume"
+  "schedule_test()" -> "suspend_never": "~suspend_never()"
+end
 "schedule_test()" -> "schedule::awaiter": "~awaiter()"
 "schedule_test()" -> "promise<int>": "~promise()"
 "caller" -> "future<int>": "~future()" 
@@ -153,4 +158,4 @@ Notice that `schedule_test()` is running on two different threads because it ret
 Libraries that provide safe and efficient algorithms that compose with the await proposal are needed as much as the algorithms in the existing STL and the proposed RangeV3 libraries. I will show some options for these in subsequent posts.
 
 ### try it out
-After installing [Visual Studio 2015 Preview](https://www.visualstudio.com/en-us/news/vs2015-vs.aspx) clone  [await](https://github.com/kirkshoop/await) and open the await solution. Currently the implementation requires that RTC be disabled and `/await` for the compiler and x64 machine target for the linker, which this solution has configured correctly.
+After installing [Visual Studio 2015 Preview](https://www.visualstudio.com/en-us/news/vs2015-vs.aspx) clone  [await](https://github.com/kirkshoop/await) and open the await solution. This code is in the **await** project in the solution. Currently the implementation requires that RTC be disabled and `/await` for the compiler and x64 machine target for the linker, which this solution has configured correctly.
