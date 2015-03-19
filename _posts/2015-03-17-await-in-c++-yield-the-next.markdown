@@ -77,7 +77,7 @@ group "iteration 1..N"
   "fibonacci" -[#blue]> "generator<int>::iterator" : " resume operator++()"
   "caller" <-- "generator<int>::iterator" : "generator<int>::iterator()"
   "caller" -> "generator<int>::iterator" : "operator*()"
-  "caller" <-- "generator<int>::iterator" : "1..N"
+  "caller" <-- "generator<int>::iterator" : "1..N"
 end
 group final
   "fibonacci" -> "generator<int>::promise_type": "await final_suspend()"
