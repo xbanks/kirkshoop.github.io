@@ -118,7 +118,7 @@ end
 "schedule_test()" <-- "schedule::awaiter": "false"
 "schedule_test()" -> "schedule::awaiter": "await_suspend(resumable_handle)"
 "schedule::awaiter" -> "os": "CreateThreadpoolTimer()"
-"caller" <-- "schedule_test()": "return future<int>"
+"caller" <-- "schedule_test()": "future<int>()"
 "caller" -> "future<int>" : "get()"
 ... one second later ...
 "schedule::awaiter" <-- "os": "TimerCallback()"
@@ -126,7 +126,7 @@ end
 "schedule_test()" -> "schedule::awaiter": "cancellation_requested()"
 "schedule_test()" -> "schedule::awaiter": "await_resume"
 "promise<int>"  <-- "schedule_test()": "set_result()"
-"caller" <-- "future<int>" 
+"caller" <-- "future<int>" : "get() returns"
 group final
   "schedule_test()" -> "promise<int>": "await final_suspend()"
   "schedule_test()" <-- "promise<int>": "suspend_never()"
