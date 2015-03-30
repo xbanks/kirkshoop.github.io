@@ -24,6 +24,10 @@ end
 desc "Generate and publish blog to master"
 task :publish => [:generate] do
   Dir.mktmpdir do |tmp|
+    system "git add --all"
+    system "git add -u"
+    system "git status"
+    system "git stash"
     system "mv _site/* #{tmp}"
     system "git checkout -B master"
     system "rm -rf *"
@@ -33,6 +37,7 @@ task :publish => [:generate] do
     system "git commit -am #{message.shellescape}"
     system "git push origin master --force"
     system "git checkout source"
+    system "git stash pop --index"
     system "echo yolo"
   end
 end
