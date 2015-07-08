@@ -27,15 +27,17 @@ Testers have said that they have a hard time finding bugs in code written using 
 * 2001-present - Employee
 
 #####Current
-I am working on various open source projects in my current role at [Microsoft Open Technologies, Inc.](https://msopentech.com/).
+I work on Azure Machine Learning. Updates here, as features and products are released..
 
-* [Dash.js](https://github.com/Dash-Industry-Forum/dash.js/) *owner* standards compliance and oversight
-* [chromium blink](http://www.chromium.org/blink) *contributor* standards compliance fixes ([example](https://codereview.chromium.org/894913002))
-* [OpenJDK](http://openjdk.java.net/) *author* improvements for windows ([example](http://hg.openjdk.java.net/jdk9/dev/jdk/rev/26e6402772c8))
-* [Redis](https://github.com/MSOpenTech/redis) *owner* port to Windows
+#####Past
+I worked on various open source projects in my role at [Microsoft Open Technologies, Inc.](https://msopentech.com/).
 
-#####Recent
-These are other projects to which I have contributed.
+* [Dash.js](https://github.com/Dash-Industry-Forum/dash.js/) standards compliance and oversight
+* [chromium blink](http://www.chromium.org/blink) standards compliance fixes ([example](https://codereview.chromium.org/894913002))
+* [OpenJDK](http://openjdk.java.net/) improvements for windows ([example](http://hg.openjdk.java.net/jdk9/dev/jdk/rev/26e6402772c8))
+* [Redis](https://github.com/MSOpenTech/redis) port to Windows
+
+Some other projects to which I have contributed:
 
 * RxJava
 * Biometrics, finger and face recognition and presence detection in windows logon.
