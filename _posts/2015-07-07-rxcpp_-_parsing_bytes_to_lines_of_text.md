@@ -44,6 +44,8 @@ There are only three steps in the answer;
   2. group into lines
   3. reduce each group to one string
 
+The code is on [github](https://github.com/Reactive-Extensions/RxCpp/commit/a156c1abf553c9eb9efdb7654b748461c1b298c8)
+
 ####create strings split on `\r`
 The first step uses regex and token_iterator to split each vector into N strings. 
 
