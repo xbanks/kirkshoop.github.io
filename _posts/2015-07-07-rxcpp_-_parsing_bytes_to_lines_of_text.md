@@ -3,6 +3,7 @@ title: rxcpp - parsing bytes to lines of text
 layout: post
 date: 2015-07-07 19:16
 
+categories: [async, rxcpp, c++,]
 ---
 
 I answered a question on [StackOverflow](http://stackoverflow.com/questions/31208418/split-iobservablebyte-to-characters-then-to-line/31213161#31213161). The question was for Rx.NET, so that is what I used in the answer. rxcpp has almost every operator that the answer required so I ported the answer to rxcpp and added it as an example.
