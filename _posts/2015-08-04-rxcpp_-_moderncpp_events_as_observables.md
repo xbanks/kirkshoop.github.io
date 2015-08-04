@@ -7,7 +7,7 @@ date: 2015-08-04 09:21 PDT
 categories: [async, rxcpp, c++,]
 ---
 
-Kenny Kerr ([blog])(http://kennykerr.ca/), [twitter](https://twitter.com/kennykerr)) has released the excellent [moderncpp](http://moderncpp.com/) library. I wanted to apply rxcpp to handle async in moderncpp. rxcpp is cross-platform and can be applied to any UI event model and I hope to build examples for other c++ UI and Networking libraries as well. 
+Kenny Kerr ([blog](http://kennykerr.ca/), [twitter](https://twitter.com/kennykerr)) has released the excellent [moderncpp](http://moderncpp.com/) library. I wanted to apply rxcpp to handle async in moderncpp. rxcpp is cross-platform and can be applied to any UI event model and I hope to build examples for other c++ UI and Networking libraries as well. 
 
 > I would love to showcase rxcpp usage - so please let me know if you have published code that combines rxcpp with other libraries, especially UI and Networking. 
 
@@ -174,7 +174,9 @@ The events that will be used are defined with `Rx::from_event()`
     auto released = . . .
 ```
 
-visuals is defined to be an `Rx::observable<VisualCollection>` that will send the root.Children() collection to each subscriber once. visuals will send the same item again every time subscribe is called, observables that behave this way are called *cold* observables.
+visuals is defined to be an `Rx::observable<VisualCollection>` that will send the `root.Children()` collection to each subscriber once. 
+
+> visuals will send the same item again every time subscribe is called, observables that behave this way are called *cold* observables.
 
 ```cpp
     auto visuals = Rx::observable<>::from(root.Children());
@@ -200,9 +202,9 @@ Each event is converted to just the location where the press occured using Posit
         .map(&PositionOf);
 ```
 
-actually adding a new visual to the collection just involves combining the adds and visuals streams and calling AddVisual.
+Actually adding a new visual to the collection just involves combining the adds and visuals streams and calling AddVisual.
 
-The `subscribe()` is required, without it there is no subscription to adds or visuals so no calls to combin_latest will occur.
+The `subscribe()` is required, without it there is no subscription to adds or visuals so no calls to combine_latest will occur.
 
 ```cpp
     // adds visuals
@@ -220,7 +222,7 @@ moving an existing visual begins the same way as adding. The adds and visuals st
 
 A simple filter ignores any presses that did not select a Visual (the Point was not within an existing Visual).
 
-`Rx::apply_to()` returns a function object that stores the supplied lambda. The returned function object is a function that takes a single `std::tuple<>` and calls the stored lambda with each tuple member as a separate parameter. This replaces `std::get<0>(arg)` pollution with nice named function arguments.
+> `Rx::apply_to()` returns a function object that stores the supplied lambda. The returned function object is a function that takes a single `std::tuple<>` and calls the stored lambda with each tuple member as a separate parameter. This replaces `std::get<0>(arg)` pollution with nice named function arguments.
 
 ```cpp
     // moves selected visuals
