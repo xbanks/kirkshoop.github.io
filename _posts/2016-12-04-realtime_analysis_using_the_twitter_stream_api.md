@@ -23,4 +23,5 @@ I wanted to try out [beast](https://github.com/vinniefalco/Beast) and I have tri
 I used the [twitter stream etiquette](https://dev.twitter.com/streaming/overview/connecting) docs to code the error handling and this list of [stop words](http://xpo6.com/list-of-english-stop-words/) to omit common english words.
 
 ## up next
-calling the twitter api
+[calling the twitter stream api]({{ site.baseurl }}{% post_url 2016-12-05-calling_the_twitter_stream_api %})
+
