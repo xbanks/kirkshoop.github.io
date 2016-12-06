@@ -210,4 +210,4 @@ auto twitter_stream_reconnection = [](observe_on_one_worker tweetthread){
 With this we get a stream of strings that contain `\r\n` delimited json documents.
 
 ## up next
-parsing json documents
+[parsing json documents]({{ site.baseurl }}{% post_url 2016-12-05-parsing_json_documents_from_a_stream %})
