@@ -159,4 +159,4 @@ inline auto parsetweets(observe_on_one_worker tweetthread)
 This is a fairly complex problem. We have chunks of text arriving over time and they need to be parsed so that json fragments that span chunks are stiched back together and multiple json documents in one chunk are split up. Writing all these algorithms in the raw using promises or callbacks would be a mess of code. Some simple algorithms can be composed to give the functionality with much less chance for confusion or error.
 
 ## up next
-Flux Architecture
+[Flux Architecture]({{ site.baseurl }}{% post_url 2016-12-06-flux_architecture_in_rxcpp %})
