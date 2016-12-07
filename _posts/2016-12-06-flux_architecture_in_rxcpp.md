@@ -1,7 +1,7 @@
 ---
 title: Flux Architecture in rxcpp
 layout: post
-date: 2016-12-06 08:00:00
+date: 2016-12-06 08:00 PST
 ---
 
 [![twitter for president-elect](/assets/twitter_analysis_president_elect.gif)](https://www.youtube.com/watch?v=QFcy-jQpvBg)
@@ -129,4 +129,4 @@ There is now a Model being updated on the mainthread using data collected from o
 > The code to produce the Model is platform and gui-framework agnostic and can be shared to build apps for different targets.
 
 ## up next
-Composing rxcpp and Range-v3
+[Composing rxcpp and Range-v3]({{ site.baseurl }}{% post_url 2016-12-06-composing_rxcpp_and_range-v3 %})
