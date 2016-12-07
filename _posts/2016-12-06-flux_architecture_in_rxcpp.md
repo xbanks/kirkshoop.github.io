@@ -1,7 +1,7 @@
 ---
 title: Flux Architecture in rxcpp
 layout: post
-date: 2016-12-06
+date: 2016-12-06 08:00:00
 ---
 
 [![twitter for president-elect](/assets/twitter_analysis_president_elect.gif)](https://www.youtube.com/watch?v=QFcy-jQpvBg)
