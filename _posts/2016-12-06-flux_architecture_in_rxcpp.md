@@ -130,3 +130,6 @@ There is now a Model being updated on the mainthread using data collected from o
 
 ## up next
 [Composing rxcpp and Range-v3]({{ site.baseurl }}{% post_url 2016-12-06-composing_rxcpp_and_range-v3 %})
+
+## more on this application
+[Realtime analysis using the twitter stream API]({{ site.baseurl }}{% post_url 2016-12-04-realtime_analysis_using_the_twitter_stream_api %}) 

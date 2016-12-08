@@ -211,3 +211,6 @@ With this we get a stream of strings that contain `\r\n` delimited json document
 
 ## up next
 [parsing json documents]({{ site.baseurl }}{% post_url 2016-12-05-parsing_json_documents_from_a_stream %})
+
+## more on this application
+[Realtime analysis using the twitter stream API]({{ site.baseurl }}{% post_url 2016-12-04-realtime_analysis_using_the_twitter_stream_api %}) 

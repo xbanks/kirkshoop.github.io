@@ -83,5 +83,7 @@ Construct `ViewModel` state from a `Model` using __Range-v3__ algorithms
 The result, is that __rxcpp__ orchestrates the calculation of a new `ViewModel` every 200ms and the calculation is done using __Range-v3__!
 
 ## up next
-Rendering with 'Dear, ImGui'
+[Rendering with 'Dear, ImGui']({{ site.baseurl }}{% post_url 2016-12-08-rendering_with_dear_imgui %}) 
 
+## more on this application
+[Realtime analysis using the twitter stream API]({{ site.baseurl }}{% post_url 2016-12-04-realtime_analysis_using_the_twitter_stream_api %}) 

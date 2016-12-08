@@ -160,3 +160,6 @@ This is a fairly complex problem. We have chunks of text arriving over time and 
 
 ## up next
 [Flux Architecture]({{ site.baseurl }}{% post_url 2016-12-06-flux_architecture_in_rxcpp %})
+
+## more on this application
+[Realtime analysis using the twitter stream API]({{ site.baseurl }}{% post_url 2016-12-04-realtime_analysis_using_the_twitter_stream_api %}) 

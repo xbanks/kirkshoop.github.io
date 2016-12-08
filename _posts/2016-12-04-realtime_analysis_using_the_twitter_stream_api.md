@@ -16,7 +16,7 @@ I watched a [presentation](https://blog.niallconnaughton.com/2016/10/25/ndc-sydn
 ## other c++ libraries
 My first task was to research C++ libraries for http requests, oauth, json and a gui. Historically, this has been a big source of pain. C++ libraries have impedence mismatches by differing on error handling, async and resource management patterns. This time I found a set of libraries that did not require a lot of glue work.
 I have used [nlohmann json](https://github.com/nlohmann/json) before, so that was an easy pick.
-I have been watching [dear imgui,](https://github.com/ocornut/imgui) and have really enjoyed using it.
+I have been watching [dear, imgui](https://github.com/ocornut/imgui) and have really enjoyed using it.
 I wanted to try out [beast](https://github.com/vinniefalco/Beast) and I have tried [c++ net lib](https://github.com/cpp-netlib/cpp-netlib) and [c++ rest sdk](https://github.com/Microsoft/cpprestsdk) before, but I searched and found this [c++ gist that calls the twitter stream api](https://gist.github.com/komasaru/9c78a278f6916548f146). The gist used the curl and oauth libraries, so I used those for this project.
 
 ## other resources
@@ -25,3 +25,9 @@ I used the [twitter stream etiquette](https://dev.twitter.com/streaming/overview
 ## up next
 [calling the twitter stream api]({{ site.baseurl }}{% post_url 2016-12-05-calling_the_twitter_stream_api %})
 
+## other posts
+| [calling the twitter stream api]({{ site.baseurl }}{% post_url 2016-12-05-calling_the_twitter_stream_api %})
+| [parsing json documents]({{ site.baseurl }}{% post_url 2016-12-05-parsing_json_documents_from_a_stream %}) 
+| [Flux Architecture]({{ site.baseurl }}{% post_url 2016-12-06-flux_architecture_in_rxcpp %})
+| [Composing rxcpp and Range-v3]({{ site.baseurl }}{% post_url 2016-12-06-composing_rxcpp_and_range-v3 %}) 
+| [Rendering with 'Dear, ImGui']({{ site.baseurl }}{% post_url 2016-12-08-rendering_with_dear_imgui %}) 
