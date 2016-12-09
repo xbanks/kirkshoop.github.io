@@ -50,7 +50,7 @@ Verify that the rendering is on the main thread
 
 Create a Window with a default size and position. When moved and resized the position is stored in `imgui.ini` and that stored value is used the next time the app is opened
 
-> EDIT: This [tweet](https://twitter.com/nlguillemot/status/807152339035557892) from the author of ImGui caused me to update to the pattern below. The UNWIND handles cleanup on exception. but is `dismiss()`ed when there is no exception. I tried a couple of different parrterns, but I do not like any of them.
+> EDIT: This [tweet](https://twitter.com/nlguillemot/status/807152339035557892) caused me to update to the pattern below. The UNWIND handles cleanup on exception. but is `dismiss()`ed when there is no exception. I tried a couple of different patterns, but I do not like any of them.
 
 ```cpp
 
@@ -118,7 +118,7 @@ __the complete expression__
     renderers.push_back(
         frame$ |
         with_latest_from(rxu::take_at<1>(), viewModel$) |
-        rxo::map([=](const ViewModel& vm){
+        tap([=](const ViewModel& vm){
             auto renderthreadid = this_thread::get_id();
             if (mainthreadid != renderthreadid) {
                 cerr << "render on wrong thread!" << endl;
@@ -130,7 +130,7 @@ __the complete expression__
 
             ImGui::SetNextWindowSize(ImVec2(200,100), ImGuiSetCond_FirstUseEver);
             if (ImGui::Begin("Live Analysis")) {
-                RXCPP_UNWIND_AUTO([](){
+                RXCPP_UNWIND(End, [](){
                     ImGui::End();
                 });
 
@@ -148,9 +148,9 @@ __the complete expression__
                     ImVec2 plotextent(ImGui::GetContentRegionAvailWidth(),100);
                     ImGui::PlotLines("", &tpm[0], tpm.size(), 0, nullptr, 0.0f, fltmax, plotextent);
                 }
+                End.dismiss();
             }
-
-            return vm.m;
+            ImGui::End();
         }) |
         reportandrepeat());
 
