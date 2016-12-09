@@ -50,15 +50,21 @@ Verify that the rendering is on the main thread
 
 Create a Window with a default size and position. When moved and resized the position is stored in `imgui.ini` and that stored value is used the next time the app is opened
 
+> EDIT: This [tweet](https://twitter.com/nlguillemot/status/807152339035557892) from the author of ImGui caused me to update to the pattern below. The UNWIND handles cleanup on exception. but is `dismiss()`ed when there is no exception. I tried a couple of different parrterns, but I do not like any of them.
+
 ```cpp
 
     ImGui::SetNextWindowSize(ImVec2(200,100), ImGuiSetCond_FirstUseEver);
     if (ImGui::Begin("Live Analysis")) {
-        RXCPP_UNWIND_AUTO([](){
+        RXCPP_UNWIND(End, [](){
             ImGui::End();
         });
-        // ...
+
+        // draw window contents
+
+        End.dismiss();
     }
+    ImGui::End();
 
 ```
 
