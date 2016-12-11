@@ -214,7 +214,7 @@ The main loop merely pumps the `mainthread` rxcpp scheduler (named `rl` for runl
 ```
 
 ## up next
-Counting Tweets
+[Counting tweets]({{ site.baseurl }}{% post_url 2016-12-10-counting_tweets %})
 
 ## more on this application
 [Realtime analysis using the twitter stream API]({{ site.baseurl }}{% post_url 2016-12-04-realtime_analysis_using_the_twitter_stream_api %}) 
