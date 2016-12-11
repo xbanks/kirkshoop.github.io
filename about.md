@@ -29,7 +29,9 @@ Testers have said that they have a hard time finding bugs in code written using 
 * 2001-present - Employee
 
 ##### Current
-I work on Azure Machine Learning. Updates here, as features and products are released..
+I work on Azure Machine Learning.
+
+* [Web Service Management](https://services.azureml.net)
 
 ##### Past
 I worked on various open source projects in my role at [Microsoft Open Technologies, Inc.](https://msopentech.com/).
@@ -54,5 +56,13 @@ Worked on the RealServer and RealPlayer, adding end-to-end Authentication and fe
 # Interest
  I have been using all spare time to work on some projects that I care about; [`rxcpp`](https://github.com/Reactive-Extensions/RxCpp) and [async](https://github.com/kirkshoop/await).
  
- I also to publish what I am learning and doing ([blog](http://kirkshoop.github.io/), [CppCon 2014 talk on youtube](https://www.youtube.com/watch?v=Bfn9hA-3n6k))
+ I also to publish what I am learning and doing:
+
+Description    | Link |
+-------------- | :--------------- |
+Twitter real-time analysis using rxcpp and Range-v3 | [![twitter stream analysis app](/assets/twitter_analysis_president_elect.gif)](https://github.com/kirkshoop/twitter)
+CppCon 2016 talk on youtube | [![CppCon 2016](https://img.youtube.com/vi/FcQURwM806o/0.jpg)](https://www.youtube.com/watch?v=FcQURwM806o)
+C++ Russia talk on youtube | [![C++ Russia 2016](https://img.youtube.com/vi/Re6DS5Ff0uE/0.jpg)](https://www.youtube.com/watch?v=Re6DS5Ff0uE)
+CppCon 2014 talk on youtube | [![CppCon 2014](https://img.youtube.com/vi/Bfn9hA-3n6k/0.jpg)](https://www.youtube.com/watch?v=Bfn9hA-3n6k)
+
  
