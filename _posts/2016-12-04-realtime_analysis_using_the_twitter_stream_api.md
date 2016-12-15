@@ -7,6 +7,9 @@ date: 2016-12-04
 [![twitter for president-elect](/assets/twitter_analysis_president_elect.gif)](https://www.youtube.com/watch?v=QFcy-jQpvBg)
 [youtube](https://www.youtube.com/watch?v=QFcy-jQpvBg)
 
+## twitter analysis application
+The code for the application is on [github](https://github.com/kirkshoop/twitter). I develop and test this application on OS X, but I chose all the dependencies to make it likely to work on other platforms with minimum effort. On OS X I was able to `brew install` some dependencies and use `CMake` to install others.
+
 ## rxcpp
 I started working on [rxcpp](https://github.com/Reactive-Extensions/RxCpp) because I want a better way to write gui apps so that they do not block the main thread. I am now able to use rxcpp to build applications that do not block the main thread. I can build apps that use multi-core without writing any calls to `thread`, `mutex` or `condition_variable`. I can easily move work from one thread to another and back with small code changes that are much easier to reason about. I can adopt patterns like the _Flux architecture_ easily. I can easily test code that is working over _values-distributed-in-time_. I can use algorithms from rxcpp to collect _values-distributed-in-time_ into a model of _values-distributed-in-space_ and then use algorithms from [Range-v3](https://github.com/ericniebler/range-v3) to process the model into a View.
 
@@ -31,3 +34,4 @@ I used the [twitter stream etiquette](https://dev.twitter.com/streaming/overview
 | [Flux Architecture]({{ site.baseurl }}{% post_url 2016-12-06-flux_architecture_in_rxcpp %})
 | [Composing rxcpp and Range-v3]({{ site.baseurl }}{% post_url 2016-12-06-composing_rxcpp_and_range-v3 %}) 
 | [Rendering with 'Dear, ImGui']({{ site.baseurl }}{% post_url 2016-12-08-rendering_with_dear_imgui %}) 
+| [Counting tweets]({{ site.baseurl }}{% post_url 2016-12-10-counting_tweets %})

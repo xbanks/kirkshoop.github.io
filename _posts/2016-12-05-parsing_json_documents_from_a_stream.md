@@ -18,7 +18,7 @@ The [json parser](https://github.com/nlohmann/json) that I selected does not sup
 ```cpp
 
     // parse tweets
-    auto tweet$ = chunk$ | parsetweets(tweetthread);
+    auto tweets = chunks | parsetweets(tweetthread);
 
 ```
 
@@ -42,7 +42,7 @@ Split each string on `\r\n` when it arrives.
 ```cpp
 
     // create strings split on \r
-    auto string$ = chunk$ |
+    auto strings = chunks |
         concat_map([](const string& s){
             auto splits = split(s, "\r\n");
             return iterate(move(splits));
@@ -60,21 +60,21 @@ Now create a stream that emits 0 when a string ending in `\r\n` occurs.
 ```cpp
 
     // filter to last string in each line
-    auto close$ = string$ |
+    auto closes = strings |
         filter(isEndOfTweet) |
         rxo::map([](const string&){return 0;});
 
 ```
 
-Now use `close$` to signal the begin and end of a window. This will produce a window for each set of strings that make up one json document.
+Now use `closes` to signal the begin and end of a window. This will produce a window for each set of strings that make up one json document.
 
 > `start_with()` opens the first window, after which each close also opens a new window.
 
 ```cpp
 
     // group strings by line
-    auto linewindow$ = string$ |
-        window_toggle(close$ | start_with(0), [=](int){return close$;});
+    auto linewindows = strings |
+        window_toggle(closes | start_with(0), [=](int){return closes;});
 
 ```
 
@@ -85,7 +85,7 @@ Each window will have 1 or more strings. Now reduce each window to a single stri
 ```cpp
 
     // reduce the strings for a line into one string
-    auto line$ = linewindow$ |
+    auto lines = linewindows |
         flat_map([](const observable<string>& w) {
             return w | start_with<string>("") | sum();
         });
@@ -96,7 +96,7 @@ Now filter out strings that are empty or not properly delimited and json parse t
 
 ```cpp
 
-    return line$ |
+    return lines |
         filter([](const string& s){
             return s.size() > 2 && s.find_first_not_of("\r\n") != string::npos;
         }) | 
@@ -113,9 +113,9 @@ __the complete function__
 
 inline auto parsetweets(observe_on_one_worker tweetthread) 
     -> function<observable<shared_ptr<const json>>(observable<string>)> {
-    return [=](observable<string> chunk$){
+    return [=](observable<string> chunks){
         // create strings split on \r
-        auto string$ = chunk$ |
+        auto strings = chunks |
             concat_map([](const string& s){
                 auto splits = split(s, "\r\n");
                 return iterate(move(splits));
@@ -127,21 +127,21 @@ inline auto parsetweets(observe_on_one_worker tweetthread)
             ref_count();
 
         // filter to last string in each line
-        auto close$ = string$ |
+        auto closes = strings |
             filter(isEndOfTweet) |
             rxo::map([](const string&){return 0;});
 
         // group strings by line
-        auto linewindow$ = string$ |
-            window_toggle(close$ | start_with(0), [=](int){return close$;});
+        auto linewindows = strings |
+            window_toggle(closes | start_with(0), [=](int){return closes;});
 
         // reduce the strings for a line into one string
-        auto line$ = linewindow$ |
+        auto lines = linewindows |
             flat_map([](const observable<string>& w) {
                 return w | start_with<string>("") | sum();
             });
 
-        return line$ |
+        return lines |
             filter([](const string& s){
                 return s.size() > 2 && 
                     s.find_first_not_of("\r\n") != string::npos;

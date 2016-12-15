@@ -9,7 +9,7 @@ date: 2016-12-08 08:47 PST
 [youtube](https://www.youtube.com/watch?v=QFcy-jQpvBg)
 
 ## Dear, ImGui
-[`Dear, ImGui'](https://github.com/ocornut/imgui) is a direct-mode gui library that can be rendered using OpenGL, DirectX and other 3d apis. direct-mode means that everything on screen is re-created every frame. This means that there is no need of a view-model diff/patch library to minimize changes to a retained view - such as react or snabbdom in the browser.
+[`Dear, ImGui'](https://github.com/ocornut/imgui) is a direct-mode gui library that can be rendered using OpenGL, DirectX and other 3d apis. direct-mode means that everything on screen is re-created every frame. This means that there is no need of a view-model diff/patch library to minimize changes to a retained view - such as /react/ or /snabbdom/ in the browser.
 
 The result is very simple descriptive code to generate the view and easy composition of ux controls into a 3D scene.
 
@@ -31,8 +31,8 @@ Render once per frame, using latest `ViewModel`
 
     // render analysis
     renderers.push_back(
-        frame$ |
-        with_latest_from(rxu::take_at<1>(), viewModel$) |
+        frames |
+        with_latest_from(rxu::take_at<1>(), viewModels) |
         // ...
 ```
 
@@ -116,8 +116,8 @@ __the complete expression__
 
     // render analysis
     renderers.push_back(
-        frame$ |
-        with_latest_from(rxu::take_at<1>(), viewModel$) |
+        frames |
+        with_latest_from(rxu::take_at<1>(), viewModels) |
         tap([=](const ViewModel& vm){
             auto renderthreadid = this_thread::get_id();
             if (mainthreadid != renderthreadid) {
@@ -159,7 +159,7 @@ __the complete expression__
 ## combine views
 rxcpp is lazy. lambda's are lazy. `auto greet = []{cout << "Hello.";}` does nothing until called - `greet();`. All the rxcpp expressions we have defined thus far are dormant, waiting for a call to `subscribe()`.
 
-Since all the expressions have been connected in a graph from rxcurl -> parsetweets -> reducers -> models -> viewmodels -> views, the only `subscribe()` required is to the merged views. This `subscribe()` will propagate to every obervable in the expression. 
+Since all the expressions have been connected in a graph from rxcurl -> parsetweets -> reducers -> models -> viewmodels -> views, the only `subscribe()` required is to the merged views. This `subscribe()` will propagate to every observable in the expression. 
 
 ```cpp
 

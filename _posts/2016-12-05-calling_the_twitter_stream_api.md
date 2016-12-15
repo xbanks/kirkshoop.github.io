@@ -8,7 +8,7 @@ date: 2016-12-05
 [youtube](https://www.youtube.com/watch?v=QFcy-jQpvBg)
 
 ## twitter analysis application
-The code for the application is on [github](https://github.com/kirkshoop/twitter). I deveop and test this application on OS X, but I chose all the dependencies to make it likely to work on other platfroms with minimum effort. On OS X I was able to `brew install` some dependencies and use `CMake` to install others.
+The code for the application is on [github](https://github.com/kirkshoop/twitter). I develop and test this application on OS X, but I chose all the dependencies to make it likely to work on other platforms with minimum effort. On OS X I was able to `brew install` some dependencies and use `CMake` to install others.
 
 ## twitter stream API
 I found this [c++ gist that calls the twitter stream api](https://gist.github.com/komasaru/9c78a278f6916548f146).

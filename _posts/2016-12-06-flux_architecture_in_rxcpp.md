@@ -52,7 +52,7 @@ Split the incoming tweets into 1 second windows on a background thread.
 ```cpp
 
     reducers.push_back(
-        t$ |
+        ts |
         onlytweets() |
         window_with_time(milliseconds(1000), poolthread) |
         // ...
@@ -91,7 +91,7 @@ Take all the actions and merge them into one stream that emits `Reducer`s. Emit 
 ```cpp
 
     // combine things that modify the model
-    auto reducer$ = iterate(reducers) |
+    auto reducers = iterate(reducers) |
         // give the reducers to the UX
         merge(mainthread);
 
@@ -102,7 +102,7 @@ Apply the `Reducer`s to the Model. Collect a series of changes to the Model and 
 ```cpp
 
     // apply reducers to the model (Flux architecture)
-    auto model$ = reducer$ |
+    auto models = reducers |
         // apply things that modify the model
         scan(make_shared<Model>(), [=](shared_ptr<Model>& m, Reducer& f){
             try {

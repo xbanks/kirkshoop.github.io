@@ -15,7 +15,7 @@ Use __rxcpp__ to convert `Model`s to `ViewModel`s
 
 ```cpp
 
-    auto viewModel$ = model$ |
+    auto viewModels = models |
         // if the processing of the model takes too long, skip until caught up
         filter([=](const shared_ptr<Model>& m){
             return m->timestamp <= mainthread.now();

@@ -27,7 +27,7 @@ The __rxcpp__ `window_with_time()` operator will split up the tweets into overla
 
     // window tweets by the time that they arrive
     reducers.push_back(
-        t$ |
+        ts |
         onlytweets() |
         window_with_time(length, every, poolthread) |
 
@@ -58,7 +58,7 @@ __the complete expression__
 
     // window tweets by the time that they arrive
     reducers.push_back(
-        t$ |
+        ts |
         onlytweets() |
         window_with_time(length, every, poolthread) |
         rxo::map([](observable<shared_ptr<const json>> source){
@@ -119,7 +119,7 @@ This splits the words from each tweet on a background thread and then sends.
 
     // group tweets, that arrive, by the timestamp_ms value
     reducers.push_back(
-        t$ |
+        ts |
         onlytweets() |
         observe_on(poolthread) |
         rxo::map([=](const shared_ptr<const json>& tw){
