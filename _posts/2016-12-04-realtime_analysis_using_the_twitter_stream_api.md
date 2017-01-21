@@ -35,3 +35,5 @@ I used the [twitter stream etiquette](https://dev.twitter.com/streaming/overview
 | [Composing rxcpp and Range-v3]({{ site.baseurl }}{% post_url 2016-12-06-composing_rxcpp_and_range-v3 %}) 
 | [Rendering with 'Dear, ImGui']({{ site.baseurl }}{% post_url 2016-12-08-rendering_with_dear_imgui %}) 
 | [Counting tweets]({{ site.baseurl }}{% post_url 2016-12-10-counting_tweets %})
+| [Using an AzureML Webservice to get Sentiment]({{ site.baseurl }}{% post_url 2017-01-13-using_an_azureml_webservice_to_get_sentiment %})
+| [Track word occurrence by sentiment]({{ site.baseurl }}{% post_url 2017-01-20-track_word_occurrence_by_sentiment %})
