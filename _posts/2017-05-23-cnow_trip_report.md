@@ -14,7 +14,8 @@ Jon Kalb, Bryce Lelbach, Jackie Kay and many others worked hard to put on a grea
 Here are some of the sessions that I attended.
 
 ## Rust keynote
-_Niko Matsakis_ - [sched](https://cppnow2017.sched.com/event/ANuD/rust-hack-without-fear)
+_Niko Matsakis_ - [sched](https://cppnow2017.sched.com/event/ANuD/rust-hack-without-fear), [youtube](https://www.youtube.com/watch?v=lO1z-7cuRYI)
+[![youtube](https://img.youtube.com/vi/lO1z-7cuRYI/0.jpg){:height="92px" width="128px"}](https://www.youtube.com/watch?v=lO1z-7cuRYI)
 
 I had been watching Rust from afar for years. I have a soft spot for requiring code to be explicit about what is intended so that the compiler can detect code bugs. I have built libraries that attempt the same in C++. I had heard that at the start Rust was too explicit and that this placed too high a burden on the programmer, but that Rust was actively changing to find the best balance. 
 
@@ -25,7 +26,8 @@ Niko described how Rust will automatically apply the [Send](https://doc.rust-lan
 I was quite impressed by this talk and Rust.
 
 ## C++11’s Quiet Little Gem: <system_error>
-_Charles Bay_ - [sched](https://cppnow2017.sched.com/event/A8IW/c11s-quiet-little-gem-ltsystemerrorgt)
+_Charles Bay_ - [sched](https://cppnow2017.sched.com/event/A8IW/c11s-quiet-little-gem-ltsystemerrorgt), [youtube](https://www.youtube.com/watch?v=w7ZVbw2X-tE)
+[![youtube](https://img.youtube.com/vi/w7ZVbw2X-tE/0.jpg){:height="92px" width="128px"}](https://www.youtube.com/watch?v=w7ZVbw2X-tE)
 
 I have been interested in error code handling for a while and have built libraries to make it harder to mishandle errors. I had spent some time looking at system_error in the past and it never made sense to me. I wanted to learn how it was intended to be used.
 
@@ -34,7 +36,10 @@ Charles explained how to extend the library to handle additional error code 'cat
 I was able to use what I learned here to improve my _Errors - forgotten, but not gone_ lightning talk.
 
 ## Networking TS Workshop
-_Michael Caisse_ - [sched](https://cppnow2017.sched.com/event/A8Ie/networking-ts-workshop-part-1-of-2), [sched](https://cppnow2017.sched.com/event/A8Ie/networking-ts-workshop-part-2-of-2)
+_Michael Caisse_ - [sched](https://cppnow2017.sched.com/event/A8Ie/networking-ts-workshop-part-1-of-2), [youtube](https://www.youtube.com/watch?v=dZdTOH9bFvs)
+[![youtube](https://img.youtube.com/vi/dZdTOH9bFvs/0.jpg){:height="92px" width="128px"}](https://www.youtube.com/watch?v=dZdTOH9bFvs)
+[sched](https://cppnow2017.sched.com/event/A8Ie/networking-ts-workshop-part-2-of-2), [youtube](https://www.youtube.com/watch?v=5H-hI98TYIE)
+[![youtube](https://img.youtube.com/vi/5H-hI98TYIE/0.jpg){:height="92px" width="128px"}](https://www.youtube.com/watch?v=5H-hI98TYIE)
 
 This two part workshop covered usage of the current Networking TS proposal. I have long wanted to learn something about ASIO and since the networking TS is based on ASIO I thought that it would be a great way to get introduced.
 
@@ -47,17 +52,20 @@ In the second session Michael passed out USB sticks with the networking TS sourc
 Once I had the POST finished I began to work on wrapping async_read_some so that the rxcpp algorithms could be used with the networking TS. I did not complete this during the session, but Michael was helpful and over the next day I managed to get it working. Once I showed this to Michael, who was also running the lightning talks, he asked me if I would give another lightning talk on this.
 
 ## Haskell taketh away: limiting side effects for parallel programming
-_Ryan Newton_ - [sched](https://cppnow2017.sched.com/event/AQ4h/haskell-taketh-away-limiting-side-effects-for-parallel-programming)
+_Ryan Newton_ - [sched](https://cppnow2017.sched.com/event/AQ4h/haskell-taketh-away-limiting-side-effects-for-parallel-programming), [youtube](https://www.youtube.com/watch?v=lC5UWG5N8oY)
+[![youtube](https://img.youtube.com/vi/lC5UWG5N8oY/0.jpg){:height="92px" width="128px"}](https://www.youtube.com/watch?v=lC5UWG5N8oY)
 
 I did not take much away from this talk. I was distracted by the code I was writing for the networking TS.
 
 ## (Ab)using C++17
-_Jason Turner_ - [sched](https://cppnow2017.sched.com/event/A8IY/abusing-c17)
+_Jason Turner_ - [sched](https://cppnow2017.sched.com/event/A8IY/abusing-c17), [youtube](https://www.youtube.com/watch?v=AqDsso3S5fg)
+[![youtube](https://img.youtube.com/vi/AqDsso3S5fg/0.jpg){:height="92px" width="128px"}](https://www.youtube.com/watch?v=AqDsso3S5fg)
 
 This was a fun talk for me. I like pushing the compiler hard. Jason provided a few new ways to force the compiler to do more work for me! I will be looking for the slides to extract the code.
 
 ## The Mathematical Underpinnings of Promises in C++
-_David Sankel_ - [sched](https://cppnow2017.sched.com/event/A8JA/the-mathematical-underpinnings-of-promises-in-c)
+_David Sankel_ - [sched](https://cppnow2017.sched.com/event/A8JA/the-mathematical-underpinnings-of-promises-in-c), [youtube](https://www.youtube.com/watch?v=2OY0Zn3oBCE)
+[![youtube](https://img.youtube.com/vi/2OY0Zn3oBCE/0.jpg){:height="92px" width="128px"}](https://www.youtube.com/watch?v=2OY0Zn3oBCE)
 
 David is my primary source for learning about the math used to describe systems of computation. After the talk Jackie posted a link in the Slack channel that explains the [Denotational Semantics](https://www.cs.colorado.edu/~bec/courses/csci5535/reading/densem.pdf) math David used.
 
@@ -68,7 +76,8 @@ David also showed math for the Operational Semantics of `first()` that resolves 
 The code for this Promise is on [github](https://github.com/camio/dpl/tree/master/dplp)
 
 ## Postmodern Immutable Data Structures
-_Juan Pedro Bolivar Puente_ - [sched](https://cppnow2017.sched.com/event/A8J0/postmodern-immutable-data-structures)
+_Juan Pedro Bolivar Puente_ - [sched](https://cppnow2017.sched.com/event/A8J0/postmodern-immutable-data-structures), [youtube](https://www.youtube.com/watch?v=ZsryQp0UAC8)
+[![youtube](https://img.youtube.com/vi/ZsryQp0UAC8/0.jpg){:height="92px" width="128px"}](https://www.youtube.com/watch?v=ZsryQp0UAC8)
 
 I first saw Juan talk about his transducer library [github](https://github.com/Ableton/atria/tree/master/src/atria/xform), [youtube](https://www.youtube.com/watch?v=vohGJjGxtJQ). The transducer talk was quite good and I had just been looking for good immutable collections in C++ for my twitter app, so I was quite excited to attend this talk. 
 
@@ -79,12 +88,16 @@ The end of the talk was a spectacular demo of a text editor using the immutable 
 I look forward to using immutable collections in my apps!
 
 ## Type Based Template Metaprogramming is Not Dead
-_Odin Holmes_ - [sched](https://cppnow2017.sched.com/event/A8Ix/type-based-template-metaprogramming-is-not-dead)
+_Odin Holmes_ - [sched](https://cppnow2017.sched.com/event/A8Ix/type-based-template-metaprogramming-is-not-dead), [youtube](https://www.youtube.com/watch?v=EtU4RDCCsiU)
+[![youtube](https://img.youtube.com/vi/EtU4RDCCsiU/0.jpg){:height="92px" width="128px"}](https://www.youtube.com/watch?v=EtU4RDCCsiU)
 
 Odin's talk was based on his [blog](http://odinthenerd.blogspot.com/2017/03/start-simple-with-conditional-why.html) series that I had been following. Odin showed some great data about how a variety of language features affect compile-time performance. This is great information and the techniques that he showed for building template libraries that use the features that compile the fastest was music to my ears. I learned several important things from this talk that I will apply to my code.
 
 ## Call: A Library that Will Change the Way You Think about Function Invocations
-_Matt Calabrese_ - [sched](https://cppnow2017.sched.com/event/ARYz/call-a-library-that-will-change-the-way-you-think-about-function-invocations-part-1-of-2), [sched](https://cppnow2017.sched.com/event/A8It/call-a-library-that-will-change-the-way-you-think-about-function-invocations-part-2-of-2)
+_Matt Calabrese_ - [sched](https://cppnow2017.sched.com/event/ARYz/call-a-library-that-will-change-the-way-you-think-about-function-invocations-part-1-of-2), [youtube](https://www.youtube.com/watch?v=Fjw7NjndQ50)
+[![youtube](https://img.youtube.com/vi/Fjw7NjndQ50/0.jpg){:height="92px" width="128px"}](https://www.youtube.com/watch?v=Fjw7NjndQ50)
+[sched](https://cppnow2017.sched.com/event/A8It/call-a-library-that-will-change-the-way-you-think-about-function-invocations-part-2-of-2), [youtube](https://www.youtube.com/watch?v=hwS0ZvkKuSQ)
+[![youtube](https://img.youtube.com/vi/hwS0ZvkKuSQ/0.jpg){:height="92px" width="128px"}](https://www.youtube.com/watch?v=hwS0ZvkKuSQ)
 
 The Call library is an expression template library that allows the arguments to a function to be composed in ways that the language does not allow. expanding tuples and packs interleaved with fixed arguments without recursion. The Call library is assembled from primitives and is extensible.
 
@@ -93,26 +106,30 @@ Matt showed the code required to achieve certain calls, like de-serialization, w
 Matt insisted that the library is not ready for use and says that he intends to submit it to boost before taking it through the std process. I hope I do not have to wait long..
 
 ## Postmodern C++
-_Tony Van Eerd_ - [sched](https://cppnow2017.sched.com/event/A8Iq/postmodern-c)
+_Tony Van Eerd_ - [sched](https://cppnow2017.sched.com/event/A8Iq/postmodern-c), [youtube](https://www.youtube.com/watch?v=GPP64opjy_Y)
+[![youtube](https://img.youtube.com/vi/GPP64opjy_Y/0.jpg){:height="92px" width="128px"}](https://www.youtube.com/watch?v=GPP64opjy_Y)
 
 Tony talked about software development in C++ in a general sense and came at it from the side in a very entertaining talk. Tony seemed to focus on the Postmodern movement but in ways that tied back to real programming advice. 
 
 ## Promises in C++: The Universal Glue for Asynchronous Programs
-_David Sankel_ - [sched](https://cppnow2017.sched.com/event/A8J9/promises-in-c-the-universal-glue-for-asynchronous-programs)
+_David Sankel_ - [sched](https://cppnow2017.sched.com/event/A8J9/promises-in-c-the-universal-glue-for-asynchronous-programs), [youtube](https://www.youtube.com/watch?v=pKMZjd9CFnw)
+[![youtube](https://img.youtube.com/vi/pKMZjd9CFnw/0.jpg){:height="92px" width="128px"}](https://www.youtube.com/watch?v=pKMZjd9CFnw)
 
 David's second talk eschewed the math behind his Promise library on [github](https://github.com/camio/dpl/tree/master/dplp). Instead, David walked through code using the library. David's Promise library follows the javascript design. This means that it is structured differently. There is no future type because the Promise is not a future value (Promise does not have a `.get()` only `.then()`). To separate the producer from the consumer the Promise constructor takes a lambda and the constructor calls the lambda passing in the fulfill and reject functions as arguments. These can be saved into an async context and called later to produce the result.
 
 I prefer this pattern to the promise/future pattern, but I still miss the lazyness that would allow richer algorithms like `repeat()`, `retry()`, etc.. I also pointed out during this talk that the library allows errors to be ignored and related how rxcpp exits the process if an error is delivered to an observer that did not supply an on_error implementation. This makes it much harder to have silent errors that result is strange effects far removed from the source of the error.
 
 ## Competitive Advantage with D
-_Ali Çehreli_ - [sched](https://cppnow2017.sched.com/event/AODJ/competitive-advantage-with-d)
+_Ali Çehreli_ - [sched](https://cppnow2017.sched.com/event/AODJ/competitive-advantage-with-d), [youtube](https://www.youtube.com/watch?v=vYEKEIpM2zo)
+[![youtube](https://img.youtube.com/vi/vYEKEIpM2zo/0.jpg){:height="92px" width="128px"}](https://www.youtube.com/watch?v=vYEKEIpM2zo)
 
 This talk covered the history of D and some of its creators. Ali stated that Andrei Alexandrescu convinced him to leave C++ and use D instead. Ali talked about writing a book about D. Ali talked about D's support for linking to C and C++. Ali talked about the compiler being made open source thanks to Symantec. Ali talked about the GC being optional. Ali talked through a list of apps using D.
 
 At the end of this talk my passion for C++ remained. Rust is far more compelling language than D to me.
 
 ## A vision for C++20, and std2 (part 3 of 3)
-_Alisdair Meredith_ - [sched](https://cppnow2017.sched.com/event/A8Ic/a-vision-for-c20-and-std2-part-3-of-3)
+_Alisdair Meredith_ - [sched](https://cppnow2017.sched.com/event/A8Ic/a-vision-for-c20-and-std2-part-3-of-3), [youtube](https://www.youtube.com/watch?v=iAAAYNKU5g0)
+[![youtube](https://img.youtube.com/vi/iAAAYNKU5g0/0.jpg){:height="92px" width="128px"}](https://www.youtube.com/watch?v=iAAAYNKU5g0)
 
 I attended only this last session and participated in some discussion and voting on std vs std2 for the future standard.
 
@@ -135,7 +152,8 @@ However, I believe that the direction of the versioning is unrelated to this iss
 It was interesting to watch this discussion and voting play out. I look forward to seeing how std and std2 are built.
 
 ## The Holy Grail - A Hash Array Mapped Trie for C++
-_Phil Nash_ - [sched](https://cppnow2017.sched.com/event/A8Iw/the-holy-grail-a-hash-array-mapped-trie-for-c)
+_Phil Nash_ - [sched](https://cppnow2017.sched.com/event/A8Iw/the-holy-grail-a-hash-array-mapped-trie-for-c), [youtube](https://www.youtube.com/watch?v=WT9kmIE3Uis)
+[![youtube](https://img.youtube.com/vi/WT9kmIE3Uis/0.jpg){:height="92px" width="128px"}](https://www.youtube.com/watch?v=WT9kmIE3Uis)
 
 I was looking forward to Phil's talk. He is the author of the excellent Catch test library and I have enjoyed his past talks.
 
@@ -148,7 +166,8 @@ Phil also walked through some of the code and solicited feedback on the atomic o
 Two complementary immutable collections @ C++Now 2017 - How marvelous!
 
 ## Type-safe Programming
-_Jonathan Müller_ - [sched](https://cppnow2017.sched.com/event/A8Is/type-safe-programming)
+_Jonathan Müller_ - [sched](https://cppnow2017.sched.com/event/A8Is/type-safe-programming), [youtube](https://www.youtube.com/watch?v=iihlo9A2Ezw)
+[![youtube](https://img.youtube.com/vi/iihlo9A2Ezw/0.jpg){:height="92px" width="128px"}](https://www.youtube.com/watch?v=iihlo9A2Ezw)
 
 I was not sure that I would be able to attend the Saturday sessions as I was leaving Saturday. I am so glad I went to Jonathan's talk. 
 I have seen some of Jonathan's work online before and I was looking forward to see more.
@@ -162,7 +181,8 @@ Jonathan contrasted `explicit` constructors with a set of functions to construct
 By the end Jonathan was showing the advantages of defining an `index_t` and `difference_t` for `operator[]` indexing and a `safe_flag` type that I mentioned was just adding lifetime scope to the flag value, just as I had done in my own `unique_error`.
 
 ## Nbdl: Generic Library for Managing State Seamlessly Across Network  
-_Jason Rice_ - [sched](https://cppnow2017.sched.com/event/A8J8/nbdl-generic-library-for-managing-state-seamlessly-across-network)
+_Jason Rice_ - [sched](https://cppnow2017.sched.com/event/A8J8/nbdl-generic-library-for-managing-state-seamlessly-across-network), [youtube](https://www.youtube.com/watch?v=HgLPaHJV4Lo)
+[![youtube](https://img.youtube.com/vi/HgLPaHJV4Lo/0.jpg){:height="92px" width="128px"}](https://www.youtube.com/watch?v=HgLPaHJV4Lo)
 
 In this talk Jason explored a library based on Hana that was used to build the slides for this talk. There were a few pieces of the puzzle missing, but the gist was that the html was assembled by traversing meta-types like div and ul/li
 
@@ -171,19 +191,22 @@ In this talk Jason explored a library based on Hana that was used to build the s
 I had one regular talk and one lightning talk planned for this conference. Michael asked me to present another lightning talk on the networking TS + rxcpp prototype I made after his workshop.
 
 ## Errors - forgotten but not gone
-[slides](https://kirkshoop.github.io/norawthread/errors.html), [github](https://github.com/kirkshoop/GSL/commit/a8c46e58d318158aec5d9c53236428d0ae39703a)
+[slides](https://kirkshoop.github.io/norawthread/errors.html), [github](https://github.com/kirkshoop/GSL/commit/a8c46e58d318158aec5d9c53236428d0ae39703a), [youtube](https://www.youtube.com/watch?v=7kLyccSb7Tk)
+[![youtube](https://img.youtube.com/vi/7kLyccSb7Tk/0.jpg){:height="92px" width="128px"}](https://www.youtube.com/watch?v=7kLyccSb7Tk)
 
 This talk covered the `unique_error` library I built many years ago to give error values a lifetime. This library uses `fail_fast` to make unhandled error values a thing of the past. 
 
 The code on github is the attempt I made to send it as a PR to the GSL a while ago.
 
 ## Networking TS w/Algorithms
-[slides](https://kirkshoop.github.io/norawthread/rxnetts.html), [github](https://github.com/kirkshoop/networkingts/blob/master/examples/rx.cpp)
+[slides](https://kirkshoop.github.io/norawthread/rxnetts.html), [github](https://github.com/kirkshoop/networkingts/blob/master/examples/rx.cpp), [youtube](https://www.youtube.com/watch?v=3p5w4un9YAI)
+[![youtube](https://img.youtube.com/vi/3p5w4un9YAI/0.jpg){:height="92px" width="128px"}](https://www.youtube.com/watch?v=3p5w4un9YAI)
 
 This talk covered the code I wrote during the week to adapt the networking TS client api to work with the rxcpp algorithms.
 
 ## No raw std::thread! - Live Tweet Analysis in C++
-[slides](https://kirkshoop.github.io/norawthread), [sched](https://cppnow2017.sched.com/event/A8Ik/no-raw-stdthread-live-tweet-analysis-in-c)
+[sched](https://cppnow2017.sched.com/event/A8Ik/no-raw-stdthread-live-tweet-analysis-in-c), [slides](https://kirkshoop.github.io/norawthread), [github](https://github.com/kirkshoop/twitter), [youtube](https://www.youtube.com/watch?v=1-8gxwGN3S8)
+[![youtube](https://img.youtube.com/vi/1-8gxwGN3S8/0.jpg){:height="92px" width="128px"}](https://www.youtube.com/watch?v=1-8gxwGN3S8)
 
 In this talk I explored an app I built using rxcpp and how the right set of algorithms can be used to add threads without using primitives like std::thread directly.
 

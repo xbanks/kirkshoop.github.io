@@ -76,7 +76,7 @@ auto sentimentrequest = [](observe_on_one_worker worker, ::rxcurl::rxcurl factor
 
         auto ascii = regex_replace(t, nonascii, " ");
 
-        input1.push_back({{"tweet_text", ascii}});
+        input1.push_back({ {"tweet_text", ascii} });
     }
 
     return observable<>::defer([=]() -> observable<string> {
