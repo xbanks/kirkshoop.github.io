@@ -1,0 +1,30 @@
+
+talk to non-dev
+be vague
+be 'vulgar'
+
+show app - motivate interest
+
+values in space
+algorithms not raw
+explicit thread - coordination abstraction - pay for play
+
+...
+
+rehash content
+'open door' to new vistas - inspire
+
+-----
+
+preplan list of words that you want audience members to repeat if asked. then structure the talk to make those words stick.
+
+values-distributed-in-time
+algorithms
+virtuous procrastination
+opt-in type-forgetting virtual functions
+opt-in thread-safety
+concurrency agnostic (use with OS thread-pool, TBB, actors, event-loop, etc..)
+composable (use with rangeV3 and parallel STL)
+adaptable (create observable from callback, future, etc..)
+
+no primitives (raw threads, raw mutex, raw callbacks, promise/future)

@@ -1,0 +1,449 @@
+<!DOCTYPE html>
+<html>
+
+  <head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width initial-scale=1">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+
+    <title>always push async values</title>
+    <meta name="description" content="an intersection of C++ and Win32
+">
+
+    <link rel="stylesheet" href="/css/main.css">
+    <link rel="canonical" href="http://kirkshoop.github.io/2017/07/27/always_push_async_values.html">
+
+    <script>
+      ((window.gitter = {}).chat = {}).options = {
+        room: 'kirkshoop/kirkshoop.github.io'
+      };
+    </script>
+    <script src="https://sidecar.gitter.im/dist/sidecar.v1.js" async defer></script>
+</head>
+
+  <script>
+  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+  })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+  ga('create', 'UA-60804833-1', 'auto');
+  ga('send', 'pageview');
+
+</script>
+
+
+  <body>
+
+    <header class="site-header">
+
+  <div class="wrapper">
+
+    <div class="site-title">
+      <img src="//www.gravatar.com/avatar/346d7c46fffb46511dfea6faa3e51937?s=48">
+      <a href="/">Fictional Memory</a>
+    </div>
+
+    <nav class="site-nav">
+      <a href="#" class="menu-icon">
+        <svg viewbox="0 0 18 15">
+          <path fill="#424242" d="M18,1.484c0,0.82-0.665,1.484-1.484,1.484H1.484C0.665,2.969,0,2.304,0,1.484l0,0C0,0.665,0.665,0,1.484,0 h15.031C17.335,0,18,0.665,18,1.484L18,1.484z"></path>
+          <path fill="#424242" d="M18,7.516C18,8.335,17.335,9,16.516,9H1.484C0.665,9,0,8.335,0,7.516l0,0c0-0.82,0.665-1.484,1.484-1.484 h15.031C17.335,6.031,18,6.696,18,7.516L18,7.516z"></path>
+          <path fill="#424242" d="M18,13.516C18,14.335,17.335,15,16.516,15H1.484C0.665,15,0,14.335,0,13.516l0,0 c0-0.82,0.665-1.484,1.484-1.484h15.031C17.335,12.031,18,12.696,18,13.516L18,13.516z"></path>
+        </svg>
+      </a>
+
+      <div class="trigger">
+        
+          
+          <a class="page-link" href="/about/">About</a>
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+      </div>
+    </nav>
+
+  </div>
+
+</header>
+
+
+    <div class="page-content">
+      <div class="wrapper">
+        <div class="post">
+
+  <header class="post-header">
+    <h1 class="post-title">always push async values</h1>
+    <p class="post-meta">Jul 27, 2017</p>
+  </header>
+
+  <article class="post-content">
+    <p>The goal is of this post is to agree that; <em>Single</em>, <code class="highlighter-rouge">future.then()</code> and yes, even callbacks, all push async values from a producer to a consumer. After that, the claim - <em>always push async values</em> - should seem rather humdrum.</p>
+
+<blockquote>
+  <p>This is motivated by the <a href="https://gitter.im/kirkshoop/kirkshoop.github.io">discussion</a> with <strong>Sean Parent</strong> about <a href="https://kirkshoop.github.io/2017/07/21/promise_is_a_concept_with_many_implementations.html">promise is a concept with many implementations</a></p>
+</blockquote>
+
+<p>In the post I teased a set of concepts (<em>Single</em>) that represent all the implementations of a promise.</p>
+
+<p>The discussion exposed that some more groundwork was needed to connect and contrast <em>Single</em> with other <em>Concepts</em> and libraries.</p>
+
+<h2 id="single">Single</h2>
+
+<p>For reference:</p>
+
+<div class="language-cpp highlighter-rouge">
+<pre class="highlight"><code><span class="k">template</span> <span class="o">&lt;</span><span class="k">typename</span> <span class="n">L</span><span class="o">&gt;</span>
+<span class="n">concept</span> <span class="kt">bool</span> <span class="n">Lifetime</span><span class="p">()</span> <span class="p">{</span>
+    <span class="k">return</span> <span class="n">requires</span><span class="p">(</span><span class="k">const</span> <span class="n">L</span><span class="o">&amp;</span> <span class="n">l</span><span class="p">)</span> <span class="p">{</span>
+        <span class="p">{</span> <span class="n">l</span><span class="p">.</span><span class="n">is_stopped</span><span class="p">()</span> <span class="p">}</span> <span class="o">-&gt;</span> <span class="kt">bool</span><span class="p">;</span>
+        <span class="p">{</span> <span class="n">l</span><span class="p">.</span><span class="n">stop</span><span class="p">()</span> <span class="p">}</span> <span class="o">-&gt;</span> <span class="kt">void</span><span class="p">;</span>
+    <span class="p">};</span>
+<span class="p">}</span>
+
+<span class="k">template</span> <span class="o">&lt;</span><span class="k">typename</span> <span class="n">S</span><span class="o">&gt;</span>
+<span class="n">concept</span> <span class="kt">bool</span> <span class="n">Single</span><span class="p">()</span> <span class="p">{</span>
+    <span class="k">return</span> <span class="n">requires</span><span class="p">(</span><span class="k">const</span> <span class="n">S</span><span class="o">&amp;</span> <span class="n">s</span><span class="p">)</span> <span class="p">{</span>
+        <span class="p">{</span> <span class="n">s</span><span class="p">.</span><span class="n">value</span><span class="p">(</span><span class="k">auto</span><span class="p">)</span> <span class="p">}</span> <span class="o">-&gt;</span> <span class="kt">void</span><span class="p">;</span>
+        <span class="p">{</span> <span class="n">s</span><span class="p">.</span><span class="n">error</span><span class="p">(</span><span class="k">auto</span><span class="p">)</span> <span class="p">}</span> <span class="o">-&gt;</span> <span class="kt">void</span><span class="p">;</span>
+    <span class="p">};</span>
+<span class="p">}</span>
+
+<span class="k">template</span> <span class="o">&lt;</span><span class="k">typename</span> <span class="n">S</span><span class="o">&gt;</span>
+<span class="n">concept</span> <span class="kt">bool</span> <span class="n">SingleSubscription</span><span class="p">()</span> <span class="p">{</span>
+    <span class="k">return</span> <span class="n">requires</span><span class="p">(</span><span class="k">const</span> <span class="n">S</span><span class="o">&amp;</span> <span class="n">s</span><span class="p">)</span> <span class="p">{</span>
+        <span class="n">requires</span> <span class="n">Lifetime</span><span class="o">&lt;</span><span class="n">s</span><span class="p">.</span><span class="n">lifetime</span><span class="o">&gt;</span><span class="p">;</span>
+        <span class="n">requires</span> <span class="n">Single</span><span class="o">&lt;</span><span class="n">s</span><span class="p">.</span><span class="n">destination</span><span class="o">&gt;</span><span class="p">;</span>
+    <span class="p">};</span>
+<span class="p">}</span>
+
+<span class="k">template</span> <span class="o">&lt;</span><span class="k">typename</span> <span class="n">S</span><span class="p">,</span> <span class="k">typename</span> <span class="n">D</span><span class="o">&gt;</span>
+<span class="n">concept</span> <span class="kt">bool</span> <span class="n">SingleDeferred</span><span class="p">()</span> <span class="p">{</span>
+    <span class="k">return</span> <span class="n">requires</span><span class="p">(</span><span class="k">const</span> <span class="n">S</span><span class="o">&amp;</span> <span class="n">s</span><span class="p">,</span> <span class="k">const</span> <span class="n">D</span><span class="o">&amp;</span> <span class="n">d</span><span class="p">)</span> <span class="p">{</span>
+        <span class="n">requires</span> <span class="n">Lifetime</span><span class="o">&lt;</span><span class="n">s</span><span class="p">.</span><span class="n">subscribe</span><span class="p">(</span><span class="n">d</span><span class="p">)</span><span class="o">&gt;</span><span class="p">;</span>
+    <span class="p">};</span>
+<span class="p">}</span>
+
+<span class="k">struct</span> <span class="n">alifetime</span>
+<span class="p">{</span>
+    <span class="kt">bool</span> <span class="n">is_stopped</span><span class="p">()</span> <span class="k">const</span><span class="p">;</span>
+    <span class="kt">void</span> <span class="n">stop</span><span class="p">()</span> <span class="k">const</span><span class="p">;</span>
+<span class="p">};</span>
+<span class="k">static_assert</span><span class="p">(</span><span class="n">Lifetime</span><span class="o">&lt;</span><span class="n">alifetime</span><span class="o">&gt;</span><span class="p">(),</span> <span class="s">"not a Lifetime"</span><span class="p">);</span>
+
+<span class="k">struct</span> <span class="n">asingle</span>
+<span class="p">{</span>
+    <span class="k">template</span><span class="o">&lt;</span><span class="k">typename</span> <span class="n">T</span><span class="o">&gt;</span>
+    <span class="kt">void</span> <span class="n">value</span><span class="p">(</span><span class="n">T</span><span class="o">&amp;&amp;</span> <span class="n">t</span><span class="p">)</span> <span class="k">const</span><span class="p">;</span>
+
+    <span class="k">template</span><span class="o">&lt;</span><span class="k">typename</span> <span class="n">E</span><span class="o">&gt;</span>
+    <span class="kt">void</span> <span class="n">error</span><span class="p">(</span><span class="n">E</span><span class="o">&amp;&amp;</span> <span class="n">e</span><span class="p">)</span> <span class="k">const</span><span class="p">;</span>
+<span class="p">};</span>
+<span class="k">static_assert</span><span class="p">(</span><span class="n">Single</span><span class="o">&lt;</span><span class="n">asingle</span><span class="o">&gt;</span><span class="p">(),</span> <span class="s">"not a Single"</span><span class="p">);</span>
+
+<span class="k">struct</span> <span class="n">asinglesubscription</span>
+<span class="p">{</span>
+    <span class="n">alifetime</span> <span class="n">lifetime</span><span class="p">;</span>
+    <span class="n">asingle</span> <span class="n">destination</span><span class="p">;</span>
+<span class="p">};</span>
+<span class="k">static_assert</span><span class="p">(</span><span class="n">SingleSubscription</span><span class="o">&lt;</span><span class="n">asinglesubscription</span><span class="o">&gt;</span><span class="p">(),</span> <span class="s">"not a SingleSubscription"</span><span class="p">);</span>
+
+<span class="k">struct</span> <span class="n">asingledeferred</span>
+<span class="p">{</span>
+    <span class="n">Lifetime</span> <span class="n">subscribe</span><span class="p">(</span><span class="n">SingleSubscription</span><span class="p">)</span> <span class="k">const</span><span class="p">;</span>
+<span class="p">};</span>
+<span class="k">static_assert</span><span class="p">(</span><span class="n">SingleDeferred</span><span class="o">&lt;</span><span class="n">asingledeferred</span><span class="o">&gt;</span><span class="p">(),</span> <span class="s">"not a SingleDeferred"</span><span class="p">);</span>
+
+</code></pre>
+</div>
+
+<h2 id="push-and-pull">Push and Pull</h2>
+
+<p>push models call a function on the consumer passing the value as a parameter. <em>Single</em>, <em>Legion</em> and <em>Transducer</em> are push models. every future/promise with <code class="highlighter-rouge">then()</code> is also a push model. even callbacks are a push model.</p>
+
+<p>pull models return a value from a function on the producer. <em>Range</em> and <em>Iterator</em> are pull models.</p>
+
+<p>All the push and pull models above are modeling an iteration over <code class="highlighter-rouge">0..N</code> values. All the push and pull models above provide a surface that supports the application of algorithms to arbitrary values (e.g. POD)</p>
+
+<p>The async property model, that <strong>Sean Parent</strong> describes in this <a href="http://sean-parent.stlab.cc/papers-and-presentations#title-generating-reactive-programs-for-graphical-user-interfaces-from-multi-way-dataflow-constraint-systems">paper</a>, appears to model a graph of dynamic values (they change over time). This seems similar to the FRP model of <em>Behaviors</em>, which is a pull model.</p>
+
+<p>As an analogy - If a system was built with the async property model the result would be like a DOM.
+If the same system was built with a push model I would expect the result to be like a V-DOM (React, Cycle.js) or direct-mode (ImGui).</p>
+
+<blockquote>
+  <p>Personal Note: I prefer to structure operations on values as algorithms iterating over values rather than methods on values (e.g. a DirectXDraw algorithm passed a graph rather than a DirectXDraw method on a graph or an asPng algorithm passed a graph instead of an asPng method on a graph). the algorithm model also makes better extensibility tradeoffs IMO. Thus I prefer an async model for iteration over an async property model.</p>
+</blockquote>
+
+<h2 id="push-is-the-mathmatical-dual-of-pull">Push is the mathmatical dual of Pull</h2>
+
+<p>This has been explored repeatedly in the reactivex community. <em>Subject/Observer is Dual to Iterator</em> by <strong>Erik Meijer</strong> 
+(<a href="http://csl.stanford.edu/~christos/pldi2010.fit/meijer.duality.pdf">PDF</a>)  states that the math exists and in this <a href="https://channel9.msdn.com/Events/Lang-NEXT/Lang-NEXT-2014/Keynote-Duality">video</a>, <strong>Erik</strong> walks through the math for <em>Enumerable</em> and <em>Observable</em>. this <a href="http://www.lirico.co.uk/tag/reactivex.html">post</a> seems to do a good job showing the steps from <em>Iterable</em> to <em>Observable</em> in python.</p>
+
+<p>Here, I will show the same progression for <em>Single</em>.</p>
+
+<p>Without getting hung up on the math, the intent is to show that <em>Single</em> is the inverse of a function returning a value.</p>
+
+<blockquote>
+  <p>to focus on the arrows better, the math will</p>
+  <ul>
+    <li>omit the concepts for lifetime scope and cancellation.</li>
+    <li>assume that <code class="highlighter-rouge">producer()</code> &amp; <code class="highlighter-rouge">subscribe()</code> do not throw.</li>
+  </ul>
+</blockquote>
+
+<table>
+  <thead>
+    <tr>
+      <th style="text-align: left">notation</th>
+      <th style="text-align: left">pull value</th>
+      <th style="text-align: left">push value</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td style="text-align: left">usage example</td>
+      <td style="text-align: left">
+<code class="highlighter-rouge">try {</code> <br> <code class="highlighter-rouge">auto v = producer.make().get();</code> <br> <code class="highlighter-rouge">} catch (exception e) {}</code>
+</td>
+      <td style="text-align: left">
+<code class="highlighter-rouge">producer.subscribe(</code> <br> <code class="highlighter-rouge">[](auto v){}, [](auto e){});</code>
+</td>
+    </tr>
+    <tr>
+      <td style="text-align: left">
+<strong>step 1</strong> <br>reverse arrows</td>
+      <td style="text-align: left">
+<code class="highlighter-rouge">() -&gt; ( </code> <br> <code class="highlighter-rouge">() -&gt; (value | error) </code> <br> <code class="highlighter-rouge">)</code>
+</td>
+      <td style="text-align: left">
+<code class="highlighter-rouge">() &lt;- ( </code> <br> <code class="highlighter-rouge">() &lt;- (value | error) </code> <br> <code class="highlighter-rouge">)</code>
+</td>
+    </tr>
+    <tr>
+      <td style="text-align: left">
+<strong>step 2</strong> <br>rewrite with right-arrows</td>
+      <td style="text-align: left">
+<code class="highlighter-rouge">() -&gt; ( </code> <br> <code class="highlighter-rouge">() -&gt; (value | error) </code> <br> <code class="highlighter-rouge">)</code>
+</td>
+      <td style="text-align: left">
+<code class="highlighter-rouge">( </code> <br> <code class="highlighter-rouge">(value | error) -&gt; () </code> <br> <code class="highlighter-rouge">) -&gt; ()</code>
+</td>
+    </tr>
+    <tr>
+      <td style="text-align: left">define <br><strong>producer</strong>
+</td>
+      <td style="text-align: left">
+<code class="highlighter-rouge">struct producer { </code> <br> <code class="highlighter-rouge">result make(); </code> <br> <code class="highlighter-rouge">}; </code> <br> <code class="highlighter-rouge">struct result { </code> <br> <code class="highlighter-rouge">value get(); </code> <br> <code class="highlighter-rouge">};</code>
+</td>
+      <td style="text-align: left">
+<code class="highlighter-rouge">struct single_deferred {</code> <br> <code class="highlighter-rouge">void subscribe(single);</code> <br> <code class="highlighter-rouge">};</code>
+</td>
+    </tr>
+    <tr>
+      <td style="text-align: left">define <br><strong>consumer</strong>
+</td>
+      <td style="text-align: left"><code class="highlighter-rouge">_</code></td>
+      <td style="text-align: left">
+<code class="highlighter-rouge">struct single {</code> <br> <code class="highlighter-rouge">void next(auto); </code> <br> <code class="highlighter-rouge">void error(auto);</code> <br> <code class="highlighter-rouge">};</code>
+</td>
+    </tr>
+  </tbody>
+</table>
+
+<blockquote>
+  <p>the <code class="highlighter-rouge">producer.make().get()</code> pattern looks odd here, but it replicates <code class="highlighter-rouge">*producer.begin()</code> for one value instead of many. <br><code class="highlighter-rouge">make()</code> returns a <code class="highlighter-rouge">result</code> that represents both the value and the error.</p>
+</blockquote>
+
+<p>this table demonstrates that <em>Single</em> and a <em>Result</em>, both represent the same <em>Concept</em> with the roles of consumer and producer reversed. <em>Result</em> is implemented on the producer. <em>Single</em> is implemented on the consumer.</p>
+
+<h2 id="iterator-concepts">
+<em>Iterator</em> <em>Concepts</em>
+</h2>
+
+<p>The properties of <em>Iterator</em> in C++ are well known. Since <em>Single</em> and <em>Legion</em> are the same as <em>Iterator</em> with the arrows reversed how to the different <em>Iterator</em> <em>Concepts</em> apply to <em>Single</em> and <em>Legion</em>?</p>
+
+<table>
+  <thead>
+    <tr>
+      <th style="text-align: left"><em>Iterator</em></th>
+      <th style="text-align: left">applicability to <em>Single</em> &amp; <em>Legion</em>
+</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td style="text-align: left"><em>RandomAccessIterator</em></td>
+      <td style="text-align: left">indexing support could be added to the push model <em>Concepts</em>. However, what does it mean to random-access values distributed in time? An async producer would never be able to implement random-access.</td>
+    </tr>
+    <tr>
+      <td style="text-align: left"><em>BidirectionalIterator</em></td>
+      <td style="text-align: left">decrement support could be added to the push model <em>Concepts</em>. However, decrement generally requires accumulation of previously produced values and is better represented by an <em>Iterator</em> on the <em>Container</em> that has stored the accumulated values. <strong>Note:</strong> use ranges TS for values distributed in space.</td>
+    </tr>
+    <tr>
+      <td style="text-align: left"><em>ForwardIterator</em></td>
+      <td style="text-align: left">this is supported. this is almost the same as a COLD producer. each call to <code class="highlighter-rouge">subscribe()</code> calls the producer to create a new result.</td>
+    </tr>
+    <tr>
+      <td style="text-align: left"><em>InputIterator</em></td>
+      <td style="text-align: left">this is supported. this is almost the same as a HOT producer. the producer is run once, each call to <code class="highlighter-rouge">subscribe()</code> copies the result.</td>
+    </tr>
+    <tr>
+      <td style="text-align: left"><em>OutputIterator</em></td>
+      <td style="text-align: left">this is supported. The other supported <em>Iterator</em> are supported by <em>SingleDeferred</em> (producers). This one is supported by <em>Single</em> (consumers). <code class="highlighter-rouge">subscribe()</code> can be thought of as binding an input to an output <em>Iterator</em> with <code class="highlighter-rouge">std::copy(producer.begin(), producer.end(), consumer.begin())</code>.</td>
+    </tr>
+  </tbody>
+</table>
+
+<p><br></p>
+
+<h2 id="push-and-pull-for-asynchronous-producers">Push and Pull for asynchronous producers</h2>
+
+<p>I reproduced this table from slides made by <strong>Erik Meijer</strong> (<a href="https://channel9.msdn.com/Events/Lang-NEXT/Lang-NEXT-2014/Keynote-Duality">video</a>)</p>
+
+<table>
+  <thead>
+    <tr>
+      <th style="text-align: right"> </th>
+      <th style="text-align: left">One</th>
+      <th style="text-align: left">Many</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td style="text-align: right"><strong>sync</strong></td>
+      <td style="text-align: left"><code class="highlighter-rouge">T</code></td>
+      <td style="text-align: left">
+<em><code class="highlighter-rouge">Enumerable</code></em><code class="highlighter-rouge">&lt;T&gt;</code>
+</td>
+    </tr>
+    <tr>
+      <td style="text-align: right"><strong>async</strong></td>
+      <td style="text-align: left">
+<em><code class="highlighter-rouge">Future</code></em><code class="highlighter-rouge">&lt;T&gt;</code>
+</td>
+      <td style="text-align: left">
+<em><code class="highlighter-rouge">Observable</code></em><code class="highlighter-rouge">&lt;T&gt;</code>
+</td>
+    </tr>
+  </tbody>
+</table>
+
+<p><br></p>
+
+<p>The <strong>sync</strong> types are pull models, the <strong>async</strong> types are push models (when <em>Future</em> has <code class="highlighter-rouge">then()</code>)</p>
+
+<p>push and pull producers can be implemented <strong>sync</strong>. (e.g. a push model <code class="highlighter-rouge">subscribe()</code> would directly call <code class="highlighter-rouge">value()</code> or <code class="highlighter-rouge">error()</code> and return).</p>
+
+<p>pull model is great for <strong>sync</strong> values distributed in space, but push model works well too.</p>
+
+<p>pull model is not a good fit for <strong>async</strong> producers of values distributed in time, it requires blocking the consumption context.</p>
+
+<p>push is a very common pattern used for <strong>async</strong> producers. for example, callbacks are very common, but suffer from a lack of composibility. The usability and composibility are poor, because the callback contract varies from producer to producer. creating a formal set of push model <em>Concepts</em> for producers and consumers, provides a stable contract that allows; composition, shared algorithms and extensibility.</p>
+
+<h2 id="coroutines">coroutines</h2>
+
+<p>coroutines rewrite code to make a push producer appear to be pull. In doing so, coroutines serialize async work.</p>
+
+<div class="language-cpp highlighter-rouge">
+<pre class="highlight"><code><span class="k">auto</span> <span class="n">x</span> <span class="o">=</span> <span class="n">co_await</span> <span class="n">produce</span><span class="p">();</span>
+<span class="k">auto</span> <span class="n">y</span> <span class="o">=</span> <span class="n">co_await</span> <span class="n">produce</span><span class="p">();</span>
+</code></pre>
+</div>
+
+<p>the async work to produce y will not start until x is produced and delivered to the consumer. As a result, it is quite challenging to <strong>implement</strong> <code class="highlighter-rouge">when_any()</code> or <code class="highlighter-rouge">when_all()</code> using coroutines.</p>
+
+<h2 id="its-a-wrap">its a wrap</h2>
+
+<ul>
+  <li>push is dual to pull</li>
+  <li>push and pull allow composable algorithms to operate on POD values.</li>
+  <li>The <em>Single</em> <em>Concepts</em> support <em>Forward</em>, <em>Input</em> and <em>Output</em> iteration implementations.</li>
+  <li>
+<em>Single</em> is push for 1 async value</li>
+  <li>use push for async values</li>
+  <li>use <em>Single</em> to implement <code class="highlighter-rouge">promise</code>
+</li>
+</ul>
+
+<h2 id="continued-soon">continued soon</h2>
+
+<p>hopefully with the code promised last time.</p>
+
+  </article>
+
+</div>
+
+      </div>
+    </div>
+
+    <footer class="site-footer">
+
+  <div class="wrapper">
+
+    <h2 class="footer-heading">Fictional Memory</h2>
+
+    <div class="footer-col-wrapper">
+      <div class="footer-col  footer-col-1">
+        <ul class="contact-list">
+          <li>Fictional Memory</li>
+          <li><a href="mailto:kirk.shoop@gmail.com">kirk.shoop@gmail.com</a></li>
+        </ul>
+      </div>
+
+      <div class="footer-col  footer-col-2">
+        <ul class="social-media-list">
+          
+          <li>
+            <a href="https://github.com/kirkshoop">
+              <span class="icon  icon--github">
+                <svg viewbox="0 0 16 16">
+                  <path fill="#828282" d="M7.999,0.431c-4.285,0-7.76,3.474-7.76,7.761 c0,3.428,2.223,6.337,5.307,7.363c0.388,0.071,0.53-0.168,0.53-0.374c0-0.184-0.007-0.672-0.01-1.32 c-2.159,0.469-2.614-1.04-2.614-1.04c-0.353-0.896-0.862-1.135-0.862-1.135c-0.705-0.481,0.053-0.472,0.053-0.472 c0.779,0.055,1.189,0.8,1.189,0.8c0.692,1.186,1.816,0.843,2.258,0.645c0.071-0.502,0.271-0.843,0.493-1.037 C4.86,11.425,3.049,10.76,3.049,7.786c0-0.847,0.302-1.54,0.799-2.082C3.768,5.507,3.501,4.718,3.924,3.65 c0,0,0.652-0.209,2.134,0.796C6.677,4.273,7.34,4.187,8,4.184c0.659,0.003,1.323,0.089,1.943,0.261 c1.482-1.004,2.132-0.796,2.132-0.796c0.423,1.068,0.157,1.857,0.077,2.054c0.497,0.542,0.798,1.235,0.798,2.082 c0,2.981-1.814,3.637-3.543,3.829c0.279,0.24,0.527,0.713,0.527,1.437c0,1.037-0.01,1.874-0.01,2.129 c0,0.208,0.14,0.449,0.534,0.373c3.081-1.028,5.302-3.935,5.302-7.362C15.76,3.906,12.285,0.431,7.999,0.431z"></path>
+                </svg>
+              </span>
+
+              <span class="username">kirkshoop</span>
+            </a>
+          </li>
+          
+
+          
+          <li>
+            <a href="https://twitter.com/kirkshoop">
+              <span class="icon  icon--twitter">
+                <svg viewbox="0 0 16 16">
+                  <path fill="#828282" d="M15.969,3.058c-0.586,0.26-1.217,0.436-1.878,0.515c0.675-0.405,1.194-1.045,1.438-1.809
+                  c-0.632,0.375-1.332,0.647-2.076,0.793c-0.596-0.636-1.446-1.033-2.387-1.033c-1.806,0-3.27,1.464-3.27,3.27 c0,0.256,0.029,0.506,0.085,0.745C5.163,5.404,2.753,4.102,1.14,2.124C0.859,2.607,0.698,3.168,0.698,3.767 c0,1.134,0.577,2.135,1.455,2.722C1.616,6.472,1.112,6.325,0.671,6.08c0,0.014,0,0.027,0,0.041c0,1.584,1.127,2.906,2.623,3.206 C3.02,9.402,2.731,9.442,2.433,9.442c-0.211,0-0.416-0.021-0.615-0.059c0.416,1.299,1.624,2.245,3.055,2.271 c-1.119,0.877-2.529,1.4-4.061,1.4c-0.264,0-0.524-0.015-0.78-0.046c1.447,0.928,3.166,1.469,5.013,1.469 c6.015,0,9.304-4.983,9.304-9.304c0-0.142-0.003-0.283-0.009-0.423C14.976,4.29,15.531,3.714,15.969,3.058z"></path>
+                </svg>
+              </span>
+
+              <span class="username">kirkshoop</span>
+            </a>
+          </li>
+          
+        </ul>
+      </div>
+
+      <div class="footer-col  footer-col-3">
+        <p class="text">an intersection of C++ and Win32
+</p>
+      </div>
+    </div>
+
+  </div>
+
+</footer>
+
+
+  </body>
+
+</html>

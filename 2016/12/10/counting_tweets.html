@@ -1,0 +1,472 @@
+<!DOCTYPE html>
+<html>
+
+  <head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width initial-scale=1">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+
+    <title>Counting tweets</title>
+    <meta name="description" content="an intersection of C++ and Win32
+">
+
+    <link rel="stylesheet" href="/css/main.css">
+    <link rel="canonical" href="http://kirkshoop.github.io/2016/12/10/counting_tweets.html">
+
+    <script>
+      ((window.gitter = {}).chat = {}).options = {
+        room: 'kirkshoop/kirkshoop.github.io'
+      };
+    </script>
+    <script src="https://sidecar.gitter.im/dist/sidecar.v1.js" async defer></script>
+</head>
+
+  <script>
+  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+  })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+  ga('create', 'UA-60804833-1', 'auto');
+  ga('send', 'pageview');
+
+</script>
+
+
+  <body>
+
+    <header class="site-header">
+
+  <div class="wrapper">
+
+    <div class="site-title">
+      <img src="//www.gravatar.com/avatar/346d7c46fffb46511dfea6faa3e51937?s=48">
+      <a href="/">Fictional Memory</a>
+    </div>
+
+    <nav class="site-nav">
+      <a href="#" class="menu-icon">
+        <svg viewbox="0 0 18 15">
+          <path fill="#424242" d="M18,1.484c0,0.82-0.665,1.484-1.484,1.484H1.484C0.665,2.969,0,2.304,0,1.484l0,0C0,0.665,0.665,0,1.484,0 h15.031C17.335,0,18,0.665,18,1.484L18,1.484z"></path>
+          <path fill="#424242" d="M18,7.516C18,8.335,17.335,9,16.516,9H1.484C0.665,9,0,8.335,0,7.516l0,0c0-0.82,0.665-1.484,1.484-1.484 h15.031C17.335,6.031,18,6.696,18,7.516L18,7.516z"></path>
+          <path fill="#424242" d="M18,13.516C18,14.335,17.335,15,16.516,15H1.484C0.665,15,0,14.335,0,13.516l0,0 c0-0.82,0.665-1.484,1.484-1.484h15.031C17.335,12.031,18,12.696,18,13.516L18,13.516z"></path>
+        </svg>
+      </a>
+
+      <div class="trigger">
+        
+          
+          <a class="page-link" href="/about/">About</a>
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+      </div>
+    </nav>
+
+  </div>
+
+</header>
+
+
+    <div class="page-content">
+      <div class="wrapper">
+        <div class="post">
+
+  <header class="post-header">
+    <h1 class="post-title">Counting tweets</h1>
+    <p class="post-meta">Dec 10, 2016</p>
+  </header>
+
+  <article class="post-content">
+    <p><a href="https://www.youtube.com/watch?v=QFcy-jQpvBg"><img src="/assets/twitter_analysis_president_elect.gif" alt="twitter for president-elect"></a>
+<a href="https://www.youtube.com/watch?v=QFcy-jQpvBg">youtube</a></p>
+
+<h2 id="counting-tweets">Counting tweets</h2>
+<p>Counting tweets one of the ways the app processes the data to provide useful functionality. This will finally begin to justify the existance of this app.</p>
+
+<p>The app counts tweets in two different ways. One plot shows tweets counted by their arrival time. Another plot shows tweets counted by their timestamp_ms value.</p>
+
+<p>The plots sometimes show oscillations.</p>
+
+<p>When the arrival plot has oscillations it means that delivery is being interrupted, but often the timestamp_ms plot is unaffected showing that all the tweets that were selected did eventually arrive. This usually appears as a sawtooth pattern.</p>
+
+<p>When the timestamp_ms plot has oscillations it means that twitter’s tweet sampling has been impacted, but usually the arrival plot is unaffected. This usually appears as a sine wave pattern.</p>
+
+<h2 id="count-tweets-by-arrival-time">count tweets by arrival time</h2>
+
+<p>The <strong>rxcpp</strong> <code class="highlighter-rouge">window_with_time()</code> operator will split up the tweets into overlapping windows of time. <code class="highlighter-rouge">length</code> is 1 minute and <code class="highlighter-rouge">every</code> is 5 seconds. Every 5 seconds a new window will be created that will complete 1 minute later. There are multiple overlapping windows open. Each tweet will be delivered to every window that was open at the time it arrived.</p>
+
+<div class="language-cpp highlighter-rouge">
+<pre class="highlight"><code>
+    <span class="c1">// window tweets by the time that they arrive
+</span>    <span class="n">reducers</span><span class="p">.</span><span class="n">push_back</span><span class="p">(</span>
+        <span class="n">ts</span> <span class="o">|</span>
+        <span class="n">onlytweets</span><span class="p">()</span> <span class="o">|</span>
+        <span class="n">window_with_time</span><span class="p">(</span><span class="n">length</span><span class="p">,</span> <span class="n">every</span><span class="p">,</span> <span class="n">poolthread</span><span class="p">)</span> <span class="o">|</span>
+
+</code></pre>
+</div>
+
+<p>To start each window, cast <code class="highlighter-rouge">now()</code> to seconds to round to the nearest second and use that as the beginning of this window.</p>
+
+<div class="language-cpp highlighter-rouge">
+<pre class="highlight"><code>
+    <span class="k">auto</span> <span class="n">rangebegin</span> <span class="o">=</span> <span class="n">time_point_cast</span><span class="o">&lt;</span><span class="n">seconds</span><span class="o">&gt;</span><span class="p">(</span><span class="n">system_clock</span><span class="o">::</span><span class="n">now</span><span class="p">()).</span><span class="n">time_since_epoch</span><span class="p">();</span>
+
+</code></pre>
+</div>
+
+<p>Update the tweet count for this window in the Model</p>
+
+<div class="language-cpp highlighter-rouge">
+<pre class="highlight"><code>
+    <span class="k">const</span> <span class="k">auto</span> <span class="n">i</span> <span class="o">=</span> <span class="n">duration_cast</span><span class="o">&lt;</span><span class="n">seconds</span><span class="o">&gt;</span><span class="p">(</span><span class="n">rangebegin</span> <span class="o">-</span> <span class="n">m</span><span class="p">.</span><span class="n">tweetsstart</span><span class="p">).</span><span class="n">count</span><span class="p">()</span><span class="o">/</span><span class="n">duration_cast</span><span class="o">&lt;</span><span class="n">seconds</span><span class="o">&gt;</span><span class="p">(</span><span class="n">every</span><span class="p">).</span><span class="n">count</span><span class="p">();</span>
+    <span class="o">++</span><span class="n">m</span><span class="p">.</span><span class="n">tweetsperminute</span><span class="p">[</span><span class="n">i</span><span class="p">];</span>
+
+</code></pre>
+</div>
+
+<p>The rest of the code maintains a limit to the history that is kept in memory.</p>
+
+<p><strong>the complete expression</strong></p>
+
+<div class="language-cpp highlighter-rouge">
+<pre class="highlight"><code>
+    <span class="c1">// window tweets by the time that they arrive
+</span>    <span class="n">reducers</span><span class="p">.</span><span class="n">push_back</span><span class="p">(</span>
+        <span class="n">ts</span> <span class="o">|</span>
+        <span class="n">onlytweets</span><span class="p">()</span> <span class="o">|</span>
+        <span class="n">window_with_time</span><span class="p">(</span><span class="n">length</span><span class="p">,</span> <span class="n">every</span><span class="p">,</span> <span class="n">poolthread</span><span class="p">)</span> <span class="o">|</span>
+        <span class="n">rxo</span><span class="o">::</span><span class="n">map</span><span class="p">([](</span><span class="n">observable</span><span class="o">&lt;</span><span class="n">shared_ptr</span><span class="o">&lt;</span><span class="k">const</span> <span class="n">json</span><span class="o">&gt;&gt;</span> <span class="n">source</span><span class="p">){</span>
+            <span class="k">auto</span> <span class="n">rangebegin</span> <span class="o">=</span> <span class="n">time_point_cast</span><span class="o">&lt;</span><span class="n">seconds</span><span class="o">&gt;</span><span class="p">(</span><span class="n">system_clock</span><span class="o">::</span><span class="n">now</span><span class="p">()).</span><span class="n">time_since_epoch</span><span class="p">();</span>
+            <span class="k">auto</span> <span class="n">tweetsperminute</span> <span class="o">=</span> <span class="n">source</span> <span class="o">|</span> 
+                <span class="n">rxo</span><span class="o">::</span><span class="n">map</span><span class="p">([</span><span class="o">=</span><span class="p">](</span><span class="k">const</span> <span class="n">shared_ptr</span><span class="o">&lt;</span><span class="k">const</span> <span class="n">json</span><span class="o">&gt;&amp;</span><span class="p">)</span> <span class="p">{</span>
+                    <span class="k">return</span> <span class="n">Reducer</span><span class="p">([</span><span class="o">=</span><span class="p">](</span><span class="n">shared_ptr</span><span class="o">&lt;</span><span class="n">Model</span><span class="o">&gt;&amp;</span> <span class="n">md</span><span class="p">){</span>
+                        <span class="k">auto</span><span class="o">&amp;</span> <span class="n">m</span> <span class="o">=</span> <span class="o">*</span><span class="n">md</span><span class="p">;</span>
+
+                        <span class="k">auto</span> <span class="n">maxsize</span> <span class="o">=</span> <span class="p">(</span><span class="n">duration_cast</span><span class="o">&lt;</span><span class="n">seconds</span><span class="o">&gt;</span><span class="p">(</span><span class="n">keep</span><span class="p">).</span><span class="n">count</span><span class="p">()</span><span class="o">+</span><span class="n">duration_cast</span><span class="o">&lt;</span><span class="n">seconds</span><span class="o">&gt;</span><span class="p">(</span><span class="n">length</span><span class="p">).</span><span class="n">count</span><span class="p">())</span><span class="o">/</span><span class="n">duration_cast</span><span class="o">&lt;</span><span class="n">seconds</span><span class="o">&gt;</span><span class="p">(</span><span class="n">every</span><span class="p">).</span><span class="n">count</span><span class="p">();</span>
+
+                        <span class="k">if</span> <span class="p">(</span><span class="n">m</span><span class="p">.</span><span class="n">tweetsperminute</span><span class="p">.</span><span class="n">size</span><span class="p">()</span> <span class="o">==</span> <span class="mi">0</span><span class="p">)</span> <span class="p">{</span>
+                            <span class="n">m</span><span class="p">.</span><span class="n">tweetsstart</span> <span class="o">=</span> <span class="n">duration_cast</span><span class="o">&lt;</span><span class="n">seconds</span><span class="o">&gt;</span><span class="p">(</span><span class="n">rangebegin</span> <span class="o">+</span> <span class="n">length</span><span class="p">);</span>
+                        <span class="p">}</span>
+                        
+                        <span class="k">if</span> <span class="p">(</span><span class="k">static_cast</span><span class="o">&lt;</span><span class="kt">long</span> <span class="kt">long</span><span class="o">&gt;</span><span class="p">(</span><span class="n">m</span><span class="p">.</span><span class="n">tweetsperminute</span><span class="p">.</span><span class="n">size</span><span class="p">())</span> <span class="o">&lt;</span> <span class="n">maxsize</span><span class="p">)</span> <span class="p">{</span>
+                            <span class="c1">// fill in missing history
+</span>                            <span class="k">while</span> <span class="p">(</span><span class="n">maxsize</span> <span class="o">&gt;</span> <span class="k">static_cast</span><span class="o">&lt;</span><span class="kt">long</span> <span class="kt">long</span><span class="o">&gt;</span><span class="p">(</span><span class="n">m</span><span class="p">.</span><span class="n">tweetsperminute</span><span class="p">.</span><span class="n">size</span><span class="p">()))</span> <span class="p">{</span>
+                                <span class="n">m</span><span class="p">.</span><span class="n">tweetsperminute</span><span class="p">.</span><span class="n">push_front</span><span class="p">(</span><span class="mi">0</span><span class="p">);</span>
+                                <span class="n">m</span><span class="p">.</span><span class="n">tweetsstart</span> <span class="o">-=</span> <span class="n">duration_cast</span><span class="o">&lt;</span><span class="n">seconds</span><span class="o">&gt;</span><span class="p">(</span><span class="n">every</span><span class="p">);</span>
+                            <span class="p">}</span>
+                        <span class="p">}</span>
+
+                        <span class="k">if</span> <span class="p">(</span><span class="n">rangebegin</span> <span class="o">&gt;=</span> <span class="n">m</span><span class="p">.</span><span class="n">tweetsstart</span><span class="p">)</span> <span class="p">{</span>
+
+                            <span class="k">const</span> <span class="k">auto</span> <span class="n">i</span> <span class="o">=</span> <span class="n">duration_cast</span><span class="o">&lt;</span><span class="n">seconds</span><span class="o">&gt;</span><span class="p">(</span><span class="n">rangebegin</span> <span class="o">-</span> <span class="n">m</span><span class="p">.</span><span class="n">tweetsstart</span><span class="p">).</span><span class="n">count</span><span class="p">()</span><span class="o">/</span><span class="n">duration_cast</span><span class="o">&lt;</span><span class="n">seconds</span><span class="o">&gt;</span><span class="p">(</span><span class="n">every</span><span class="p">).</span><span class="n">count</span><span class="p">();</span>
+
+                            <span class="c1">// add future buckets
+</span>                            <span class="k">while</span><span class="p">(</span><span class="n">i</span> <span class="o">&gt;=</span> <span class="k">static_cast</span><span class="o">&lt;</span><span class="kt">long</span> <span class="kt">long</span><span class="o">&gt;</span><span class="p">(</span><span class="n">m</span><span class="p">.</span><span class="n">tweetsperminute</span><span class="p">.</span><span class="n">size</span><span class="p">()))</span> <span class="p">{</span>
+                                <span class="n">m</span><span class="p">.</span><span class="n">tweetsperminute</span><span class="p">.</span><span class="n">push_back</span><span class="p">(</span><span class="mi">0</span><span class="p">);</span>
+                            <span class="p">}</span>
+
+                            <span class="o">++</span><span class="n">m</span><span class="p">.</span><span class="n">tweetsperminute</span><span class="p">[</span><span class="n">i</span><span class="p">];</span>
+                        <span class="p">}</span>
+
+                        <span class="c1">// discard expired data
+</span>                        <span class="k">while</span><span class="p">(</span><span class="k">static_cast</span><span class="o">&lt;</span><span class="kt">long</span> <span class="kt">long</span><span class="o">&gt;</span><span class="p">(</span><span class="n">m</span><span class="p">.</span><span class="n">tweetsperminute</span><span class="p">.</span><span class="n">size</span><span class="p">())</span> <span class="o">&gt;</span> <span class="n">maxsize</span><span class="p">)</span> <span class="p">{</span>
+                            <span class="n">m</span><span class="p">.</span><span class="n">tweetsstart</span> <span class="o">+=</span> <span class="n">duration_cast</span><span class="o">&lt;</span><span class="n">seconds</span><span class="o">&gt;</span><span class="p">(</span><span class="n">every</span><span class="p">);</span>
+                            <span class="n">m</span><span class="p">.</span><span class="n">tweetsperminute</span><span class="p">.</span><span class="n">pop_front</span><span class="p">();</span>
+                        <span class="p">}</span>
+
+                        <span class="k">return</span> <span class="n">std</span><span class="o">::</span><span class="n">move</span><span class="p">(</span><span class="n">md</span><span class="p">);</span>
+                    <span class="p">});</span>
+                <span class="p">});</span>
+            <span class="k">return</span> <span class="n">tweetsperminute</span><span class="p">;</span>
+        <span class="p">})</span> <span class="o">|</span>
+        <span class="n">merge</span><span class="p">()</span> <span class="o">|</span>
+        <span class="n">nooponerror</span><span class="p">()</span> <span class="o">|</span>
+        <span class="n">start_with</span><span class="p">(</span><span class="n">noop</span><span class="p">));</span>
+
+</code></pre>
+</div>
+
+<h2 id="count-tweets-by-timestamp_ms">count tweets by timestamp_ms</h2>
+
+<p>This splits the words from each tweet on a background thread and then sends.</p>
+
+<div class="language-cpp highlighter-rouge">
+<pre class="highlight"><code>
+    <span class="c1">// group tweets, that arrive, by the timestamp_ms value
+</span>    <span class="n">reducers</span><span class="p">.</span><span class="n">push_back</span><span class="p">(</span>
+        <span class="n">ts</span> <span class="o">|</span>
+        <span class="n">onlytweets</span><span class="p">()</span> <span class="o">|</span>
+        <span class="n">observe_on</span><span class="p">(</span><span class="n">poolthread</span><span class="p">)</span> <span class="o">|</span>
+        <span class="n">rxo</span><span class="o">::</span><span class="n">map</span><span class="p">([</span><span class="o">=</span><span class="p">](</span><span class="k">const</span> <span class="n">shared_ptr</span><span class="o">&lt;</span><span class="k">const</span> <span class="n">json</span><span class="o">&gt;&amp;</span> <span class="n">tw</span><span class="p">){</span>
+            <span class="k">auto</span><span class="o">&amp;</span> <span class="n">tweet</span> <span class="o">=</span> <span class="o">*</span><span class="n">tw</span><span class="p">;</span>
+
+            <span class="k">auto</span> <span class="n">text</span> <span class="o">=</span> <span class="n">tweettext</span><span class="p">(</span><span class="n">tweet</span><span class="p">);</span>
+
+            <span class="k">auto</span> <span class="n">words</span> <span class="o">=</span> <span class="n">splitwords</span><span class="p">(</span><span class="n">text</span><span class="p">);</span>
+
+            <span class="k">return</span> <span class="n">Reducer</span><span class="p">([</span><span class="o">=</span><span class="p">](</span><span class="n">shared_ptr</span><span class="o">&lt;</span><span class="n">Model</span><span class="o">&gt;&amp;</span> <span class="n">m</span><span class="p">){</span>
+                <span class="k">auto</span> <span class="n">t</span> <span class="o">=</span> <span class="n">timestamp_ms</span><span class="p">(</span><span class="n">tw</span><span class="p">);</span>
+
+                <span class="n">updategroups</span><span class="p">(</span><span class="n">m</span><span class="p">,</span> <span class="n">t</span><span class="p">,</span> <span class="n">tw</span><span class="p">,</span> <span class="n">words</span><span class="p">);</span>
+
+                <span class="k">return</span> <span class="n">std</span><span class="o">::</span><span class="n">move</span><span class="p">(</span><span class="n">m</span><span class="p">);</span>
+            <span class="p">});</span>
+        <span class="p">})</span> <span class="o">|</span>
+        <span class="n">nooponerror</span><span class="p">()</span> <span class="o">|</span>
+        <span class="n">start_with</span><span class="p">(</span><span class="n">noop</span><span class="p">));</span>
+
+</code></pre>
+</div>
+
+<h4 id="splitwords">splitwords()</h4>
+
+<p>A pretty simple function that took a few iterations to get into a useful state just for English text. A really good solution would get very complex.</p>
+
+<p>The approach here is to split the text on whitespace first.</p>
+
+<div class="language-cpp highlighter-rouge">
+<pre class="highlight"><code>
+    <span class="k">static</span> <span class="k">const</span> <span class="n">string</span> <span class="n">delimiters</span> <span class="o">=</span> <span class="s">R"(\s+)"</span><span class="p">;</span>
+    <span class="k">auto</span> <span class="n">words</span> <span class="o">=</span> <span class="n">split</span><span class="p">(</span><span class="n">text</span><span class="p">,</span> <span class="n">delimiters</span><span class="p">,</span> <span class="n">Split</span><span class="o">::</span><span class="n">RemoveDelimiter</span><span class="p">);</span>
+
+</code></pre>
+</div>
+<p>For each string - remove some leading and trailing punctuation</p>
+
+<div class="language-cpp highlighter-rouge">
+<pre class="highlight"><code>
+    <span class="k">while</span> <span class="p">(</span><span class="o">!</span><span class="n">word</span><span class="p">.</span><span class="n">empty</span><span class="p">()</span> <span class="o">&amp;&amp;</span> <span class="p">(</span><span class="n">word</span><span class="p">.</span><span class="n">front</span><span class="p">()</span> <span class="o">==</span> <span class="sc">'.'</span> <span class="o">||</span> <span class="n">word</span><span class="p">.</span><span class="n">front</span><span class="p">()</span> <span class="o">==</span> <span class="sc">'('</span> <span class="o">||</span> <span class="n">word</span><span class="p">.</span><span class="n">front</span><span class="p">()</span> <span class="o">==</span> <span class="sc">'\''</span> <span class="o">||</span> <span class="n">word</span><span class="p">.</span><span class="n">front</span><span class="p">()</span> <span class="o">==</span> <span class="sc">'\"'</span><span class="p">))</span> <span class="n">word</span><span class="p">.</span><span class="n">erase</span><span class="p">(</span><span class="n">word</span><span class="p">.</span><span class="n">begin</span><span class="p">());</span>
+    <span class="k">while</span> <span class="p">(</span><span class="o">!</span><span class="n">word</span><span class="p">.</span><span class="n">empty</span><span class="p">()</span> <span class="o">&amp;&amp;</span> <span class="p">(</span><span class="n">word</span><span class="p">.</span><span class="n">back</span><span class="p">()</span> <span class="o">==</span> <span class="sc">':'</span> <span class="o">||</span> <span class="n">word</span><span class="p">.</span><span class="n">back</span><span class="p">()</span> <span class="o">==</span> <span class="sc">','</span> <span class="o">||</span> <span class="n">word</span><span class="p">.</span><span class="n">back</span><span class="p">()</span> <span class="o">==</span> <span class="sc">')'</span> <span class="o">||</span> <span class="n">word</span><span class="p">.</span><span class="n">back</span><span class="p">()</span> <span class="o">==</span> <span class="sc">'\''</span> <span class="o">||</span> <span class="n">word</span><span class="p">.</span><span class="n">back</span><span class="p">()</span> <span class="o">==</span> <span class="sc">'\"'</span><span class="p">))</span> <span class="n">word</span><span class="p">.</span><span class="n">resize</span><span class="p">(</span><span class="n">word</span><span class="p">.</span><span class="n">size</span><span class="p">()</span> <span class="o">-</span> <span class="mi">1</span><span class="p">);</span>
+
+</code></pre>
+</div>
+
+<p>Replace some common expletives with a fixed string</p>
+
+<div class="language-cpp highlighter-rouge">
+<pre class="highlight"><code>
+    <span class="n">word</span> <span class="o">=</span> <span class="n">regex_replace</span><span class="p">(</span><span class="n">word</span><span class="p">,</span> <span class="n">expletives</span><span class="p">,</span> <span class="s">"&lt;expletive&gt;"</span><span class="p">);</span>
+
+</code></pre>
+</div>
+
+<p>‘stop’ words are words that should be ignored because they are too generic and common to represent a topic or trend. I got a start on my list <a href="//%20http://xpo6.com/list-of-english-stop-words/">here</a> and then added more words that did not convey much meaning in the word cloud.</p>
+
+<div class="language-cpp highlighter-rouge">
+<pre class="highlight"><code>
+    <span class="n">words</span><span class="p">.</span><span class="n">erase</span><span class="p">(</span><span class="n">std</span><span class="o">::</span><span class="n">remove_if</span><span class="p">(</span><span class="n">words</span><span class="p">.</span><span class="n">begin</span><span class="p">(),</span> <span class="n">words</span><span class="p">.</span><span class="n">end</span><span class="p">(),</span> <span class="p">[</span><span class="o">=</span><span class="p">](</span><span class="k">const</span> <span class="n">string</span><span class="o">&amp;</span> <span class="n">w</span><span class="p">){</span>
+        <span class="k">return</span> <span class="o">!</span><span class="p">(</span><span class="n">w</span><span class="p">.</span><span class="n">size</span><span class="p">()</span> <span class="o">&gt;</span> <span class="mi">2</span> <span class="o">&amp;&amp;</span> <span class="n">ignoredWords</span><span class="p">.</span><span class="n">find</span><span class="p">(</span><span class="n">w</span><span class="p">)</span> <span class="o">==</span> <span class="n">ignoredWords</span><span class="p">.</span><span class="n">end</span><span class="p">());</span>
+    <span class="p">}),</span> <span class="n">words</span><span class="p">.</span><span class="n">end</span><span class="p">());</span>
+
+</code></pre>
+</div>
+
+<p>Use <strong>Range-v3</strong> to filter out word repetition. This prevents tweets that repeat a single word extensively from saturating the word counts.</p>
+
+<div class="language-cpp highlighter-rouge">
+<pre class="highlight"><code>
+    <span class="n">words</span> <span class="o">|=</span> 
+        <span class="n">ranges</span><span class="o">::</span><span class="n">action</span><span class="o">::</span><span class="n">sort</span> <span class="o">|</span>
+        <span class="n">ranges</span><span class="o">::</span><span class="n">action</span><span class="o">::</span><span class="n">unique</span><span class="p">;</span>
+
+</code></pre>
+</div>
+
+<p><strong>the complete function</strong></p>
+
+<div class="language-cpp highlighter-rouge">
+<pre class="highlight"><code>
+<span class="kr">inline</span> <span class="n">vector</span><span class="o">&lt;</span><span class="n">string</span><span class="o">&gt;</span> <span class="n">splitwords</span><span class="p">(</span><span class="k">const</span> <span class="n">string</span><span class="o">&amp;</span> <span class="n">text</span><span class="p">)</span> <span class="p">{</span>
+
+    <span class="k">static</span> <span class="k">const</span> <span class="n">unordered_set</span><span class="o">&lt;</span><span class="n">string</span><span class="o">&gt;</span> <span class="n">ignoredWords</span><span class="p">{</span>
+        <span class="s">"rt"</span><span class="p">,</span> <span class="s">"like"</span><span class="p">,</span> <span class="s">"just"</span><span class="p">,</span> <span class="s">"tomorrow"</span><span class="p">,</span> <span class="s">"new"</span><span class="p">,</span> <span class="s">"year"</span><span class="p">,</span> <span class="s">"month"</span><span class="p">,</span> <span class="s">"day"</span><span class="p">,</span>
+        <span class="s">"today"</span><span class="p">,</span> <span class="s">"make"</span><span class="p">,</span> <span class="s">"let"</span><span class="p">,</span> <span class="s">"want"</span><span class="p">,</span> <span class="s">"did"</span><span class="p">,</span> <span class="c1">// ...
+</span>    <span class="p">};</span>
+
+    <span class="k">static</span> <span class="k">const</span> <span class="n">string</span> <span class="n">delimiters</span> <span class="o">=</span> <span class="s">R"(\s+)"</span><span class="p">;</span>
+    <span class="k">auto</span> <span class="n">words</span> <span class="o">=</span> <span class="n">split</span><span class="p">(</span><span class="n">text</span><span class="p">,</span> <span class="n">delimiters</span><span class="p">,</span> <span class="n">Split</span><span class="o">::</span><span class="n">RemoveDelimiter</span><span class="p">);</span>
+
+    <span class="c1">// exclude entities, urls and some punct from this words list
+</span>
+    <span class="k">static</span> <span class="k">const</span> <span class="n">regex</span> <span class="n">ignore</span><span class="p">(</span><span class="s">R"((\xe2\x80\xa6)|(&amp;[\w]+;)|((http|ftp|https)://[\w-]+(.[\w-]+)+([\w.,@?^=%&amp;:/~+#-]*[\w@?^=%&amp;/~+#-])?))"</span><span class="p">);</span>
+    <span class="k">static</span> <span class="k">const</span> <span class="n">regex</span> <span class="n">expletives</span><span class="p">(</span><span class="s">R"(\x66\x75\x63\x6B|\x73\x68\x69\x74|\x64\x61\x6D\x6E)"</span><span class="p">);</span>
+
+    <span class="k">for</span> <span class="p">(</span><span class="k">auto</span><span class="o">&amp;</span> <span class="n">word</span><span class="o">:</span> <span class="n">words</span><span class="p">)</span> <span class="p">{</span>
+        <span class="k">while</span> <span class="p">(</span><span class="o">!</span><span class="n">word</span><span class="p">.</span><span class="n">empty</span><span class="p">()</span> <span class="o">&amp;&amp;</span> <span class="p">(</span><span class="n">word</span><span class="p">.</span><span class="n">front</span><span class="p">()</span> <span class="o">==</span> <span class="sc">'.'</span> <span class="o">||</span> <span class="n">word</span><span class="p">.</span><span class="n">front</span><span class="p">()</span> <span class="o">==</span> <span class="sc">'('</span> <span class="o">||</span> <span class="n">word</span><span class="p">.</span><span class="n">front</span><span class="p">()</span> <span class="o">==</span> <span class="sc">'\''</span> <span class="o">||</span> <span class="n">word</span><span class="p">.</span><span class="n">front</span><span class="p">()</span> <span class="o">==</span> <span class="sc">'\"'</span><span class="p">))</span> <span class="n">word</span><span class="p">.</span><span class="n">erase</span><span class="p">(</span><span class="n">word</span><span class="p">.</span><span class="n">begin</span><span class="p">());</span>
+        <span class="k">while</span> <span class="p">(</span><span class="o">!</span><span class="n">word</span><span class="p">.</span><span class="n">empty</span><span class="p">()</span> <span class="o">&amp;&amp;</span> <span class="p">(</span><span class="n">word</span><span class="p">.</span><span class="n">back</span><span class="p">()</span> <span class="o">==</span> <span class="sc">':'</span> <span class="o">||</span> <span class="n">word</span><span class="p">.</span><span class="n">back</span><span class="p">()</span> <span class="o">==</span> <span class="sc">','</span> <span class="o">||</span> <span class="n">word</span><span class="p">.</span><span class="n">back</span><span class="p">()</span> <span class="o">==</span> <span class="sc">')'</span> <span class="o">||</span> <span class="n">word</span><span class="p">.</span><span class="n">back</span><span class="p">()</span> <span class="o">==</span> <span class="sc">'\''</span> <span class="o">||</span> <span class="n">word</span><span class="p">.</span><span class="n">back</span><span class="p">()</span> <span class="o">==</span> <span class="sc">'\"'</span><span class="p">))</span> <span class="n">word</span><span class="p">.</span><span class="n">resize</span><span class="p">(</span><span class="n">word</span><span class="p">.</span><span class="n">size</span><span class="p">()</span> <span class="o">-</span> <span class="mi">1</span><span class="p">);</span>
+        <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="n">word</span><span class="p">.</span><span class="n">empty</span><span class="p">()</span> <span class="o">&amp;&amp;</span> <span class="n">word</span><span class="p">.</span><span class="n">front</span><span class="p">()</span> <span class="o">==</span> <span class="sc">'@'</span><span class="p">)</span> <span class="k">continue</span><span class="p">;</span>
+        <span class="n">word</span> <span class="o">=</span> <span class="n">regex_replace</span><span class="p">(</span><span class="n">tolower</span><span class="p">(</span><span class="n">word</span><span class="p">),</span> <span class="n">ignore</span><span class="p">,</span> <span class="s">""</span><span class="p">);</span>
+        <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="n">word</span><span class="p">.</span><span class="n">empty</span><span class="p">()</span> <span class="o">&amp;&amp;</span> <span class="n">word</span><span class="p">.</span><span class="n">front</span><span class="p">()</span> <span class="o">!=</span> <span class="sc">'#'</span><span class="p">)</span> <span class="p">{</span>
+            <span class="k">while</span> <span class="p">(</span><span class="o">!</span><span class="n">word</span><span class="p">.</span><span class="n">empty</span><span class="p">()</span> <span class="o">&amp;&amp;</span> <span class="n">ispunct</span><span class="p">(</span><span class="n">word</span><span class="p">.</span><span class="n">front</span><span class="p">()))</span> <span class="n">word</span><span class="p">.</span><span class="n">erase</span><span class="p">(</span><span class="n">word</span><span class="p">.</span><span class="n">begin</span><span class="p">());</span>
+            <span class="k">while</span> <span class="p">(</span><span class="o">!</span><span class="n">word</span><span class="p">.</span><span class="n">empty</span><span class="p">()</span> <span class="o">&amp;&amp;</span> <span class="n">ispunct</span><span class="p">(</span><span class="n">word</span><span class="p">.</span><span class="n">back</span><span class="p">()))</span> <span class="n">word</span><span class="p">.</span><span class="n">resize</span><span class="p">(</span><span class="n">word</span><span class="p">.</span><span class="n">size</span><span class="p">()</span> <span class="o">-</span> <span class="mi">1</span><span class="p">);</span>
+        <span class="p">}</span>
+        <span class="n">word</span> <span class="o">=</span> <span class="n">regex_replace</span><span class="p">(</span><span class="n">word</span><span class="p">,</span> <span class="n">expletives</span><span class="p">,</span> <span class="s">"&lt;expletive&gt;"</span><span class="p">);</span>
+    <span class="p">}</span>
+
+    <span class="n">words</span><span class="p">.</span><span class="n">erase</span><span class="p">(</span><span class="n">std</span><span class="o">::</span><span class="n">remove_if</span><span class="p">(</span><span class="n">words</span><span class="p">.</span><span class="n">begin</span><span class="p">(),</span> <span class="n">words</span><span class="p">.</span><span class="n">end</span><span class="p">(),</span> <span class="p">[</span><span class="o">=</span><span class="p">](</span><span class="k">const</span> <span class="n">string</span><span class="o">&amp;</span> <span class="n">w</span><span class="p">){</span>
+        <span class="k">return</span> <span class="o">!</span><span class="p">(</span><span class="n">w</span><span class="p">.</span><span class="n">size</span><span class="p">()</span> <span class="o">&gt;</span> <span class="mi">2</span> <span class="o">&amp;&amp;</span> <span class="n">ignoredWords</span><span class="p">.</span><span class="n">find</span><span class="p">(</span><span class="n">w</span><span class="p">)</span> <span class="o">==</span> <span class="n">ignoredWords</span><span class="p">.</span><span class="n">end</span><span class="p">());</span>
+    <span class="p">}),</span> <span class="n">words</span><span class="p">.</span><span class="n">end</span><span class="p">());</span>
+
+    <span class="n">words</span> <span class="o">|=</span> 
+        <span class="n">ranges</span><span class="o">::</span><span class="n">action</span><span class="o">::</span><span class="n">sort</span> <span class="o">|</span>
+        <span class="n">ranges</span><span class="o">::</span><span class="n">action</span><span class="o">::</span><span class="n">unique</span><span class="p">;</span>
+
+    <span class="k">return</span> <span class="n">words</span><span class="p">;</span>
+<span class="p">}</span>
+
+</code></pre>
+</div>
+
+<h4 id="updategroups">updategroups()</h4>
+
+<p>Add the tweet to each time window group in the Model and update the words counts in each group.</p>
+
+<div class="language-cpp highlighter-rouge">
+<pre class="highlight"><code>
+    <span class="k">if</span> <span class="p">(</span><span class="n">searchbegin</span><span class="o">+</span><span class="n">offset</span> <span class="o">&lt;=</span> <span class="n">timestamp</span> <span class="o">&amp;&amp;</span> <span class="n">timestamp</span> <span class="o">&lt;</span> <span class="n">searchbegin</span><span class="o">+</span><span class="n">offset</span><span class="o">+</span><span class="n">length</span><span class="p">)</span> <span class="p">{</span>
+        <span class="n">it</span><span class="o">-&gt;</span><span class="n">second</span><span class="o">-&gt;</span><span class="n">tweets</span><span class="p">.</span><span class="n">push_back</span><span class="p">(</span><span class="n">tw</span><span class="p">);</span>
+
+        <span class="k">for</span> <span class="p">(</span><span class="k">auto</span><span class="o">&amp;</span> <span class="n">word</span><span class="o">:</span> <span class="n">words</span><span class="p">)</span> <span class="p">{</span>
+            <span class="o">++</span><span class="n">it</span><span class="o">-&gt;</span><span class="n">second</span><span class="o">-&gt;</span><span class="n">words</span><span class="p">[</span><span class="n">word</span><span class="p">];</span>
+        <span class="p">}</span>
+    <span class="p">}</span>
+
+</code></pre>
+</div>
+
+<p><strong>the complete function</strong></p>
+
+<div class="language-cpp highlighter-rouge">
+<pre class="highlight"><code>
+<span class="kr">inline</span> <span class="kt">void</span> <span class="nf">updategroups</span><span class="p">(</span>
+    <span class="n">shared_ptr</span><span class="o">&lt;</span><span class="n">Model</span><span class="o">&gt;&amp;</span> <span class="n">md</span><span class="p">,</span>
+    <span class="n">milliseconds</span> <span class="n">timestamp</span><span class="p">,</span> 
+    <span class="k">const</span> <span class="n">shared_ptr</span><span class="o">&lt;</span><span class="k">const</span> <span class="n">json</span><span class="o">&gt;&amp;</span> <span class="n">tw</span> <span class="o">=</span> <span class="n">shared_ptr</span><span class="o">&lt;</span><span class="k">const</span> <span class="n">json</span><span class="o">&gt;</span><span class="p">{},</span> 
+    <span class="k">const</span> <span class="n">vector</span><span class="o">&lt;</span><span class="n">string</span><span class="o">&gt;&amp;</span> <span class="n">words</span> <span class="o">=</span> <span class="n">vector</span><span class="o">&lt;</span><span class="n">string</span><span class="o">&gt;</span><span class="p">{})</span> <span class="p">{</span>
+
+    <span class="k">auto</span><span class="o">&amp;</span> <span class="n">m</span> <span class="o">=</span> <span class="o">*</span><span class="n">md</span><span class="p">;</span>
+
+    <span class="k">auto</span> <span class="n">searchbegin</span> <span class="o">=</span> <span class="n">duration_cast</span><span class="o">&lt;</span><span class="n">minutes</span><span class="o">&gt;</span><span class="p">(</span><span class="n">duration_cast</span><span class="o">&lt;</span><span class="n">minutes</span><span class="o">&gt;</span><span class="p">(</span><span class="n">timestamp</span><span class="p">)</span> <span class="o">-</span> <span class="n">length</span><span class="p">);</span>
+    <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="n">tw</span><span class="p">)</span> <span class="p">{</span>
+        <span class="n">searchbegin</span> <span class="o">=</span> <span class="n">duration_cast</span><span class="o">&lt;</span><span class="n">minutes</span><span class="o">&gt;</span><span class="p">(</span><span class="n">duration_cast</span><span class="o">&lt;</span><span class="n">minutes</span><span class="o">&gt;</span><span class="p">(</span><span class="n">timestamp</span><span class="p">)</span> <span class="o">-</span> <span class="n">keep</span><span class="p">);</span>
+    <span class="p">}</span>
+    <span class="k">auto</span> <span class="n">searchend</span> <span class="o">=</span> <span class="n">timestamp</span><span class="p">;</span>
+    <span class="k">auto</span> <span class="n">offset</span> <span class="o">=</span> <span class="n">milliseconds</span><span class="p">(</span><span class="mi">0</span><span class="p">);</span>
+    <span class="k">for</span> <span class="p">(;</span><span class="n">searchbegin</span><span class="o">+</span><span class="n">offset</span> <span class="o">&lt;</span> <span class="n">searchend</span><span class="p">;</span><span class="n">offset</span> <span class="o">+=</span> <span class="n">duration_cast</span><span class="o">&lt;</span><span class="n">milliseconds</span><span class="o">&gt;</span><span class="p">(</span><span class="n">every</span><span class="p">)){</span>
+        <span class="k">auto</span> <span class="n">key</span> <span class="o">=</span> <span class="n">TimeRange</span><span class="p">{</span><span class="n">searchbegin</span><span class="o">+</span><span class="n">offset</span><span class="p">,</span> <span class="n">searchbegin</span><span class="o">+</span><span class="n">offset</span><span class="o">+</span><span class="n">length</span><span class="p">};</span>
+        <span class="k">auto</span> <span class="n">it</span> <span class="o">=</span> <span class="n">m</span><span class="p">.</span><span class="n">groupedtweets</span><span class="p">.</span><span class="n">find</span><span class="p">(</span><span class="n">key</span><span class="p">);</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">it</span> <span class="o">==</span> <span class="n">m</span><span class="p">.</span><span class="n">groupedtweets</span><span class="p">.</span><span class="n">end</span><span class="p">())</span> <span class="p">{</span>
+            <span class="c1">// add group
+</span>            <span class="n">m</span><span class="p">.</span><span class="n">groups</span><span class="p">.</span><span class="n">push_back</span><span class="p">(</span><span class="n">key</span><span class="p">);</span>
+            <span class="n">m</span><span class="p">.</span><span class="n">groups</span> <span class="o">|=</span> <span class="n">ranges</span><span class="o">::</span><span class="n">action</span><span class="o">::</span><span class="n">sort</span><span class="p">(</span><span class="n">less</span><span class="o">&lt;</span><span class="n">TimeRange</span><span class="o">&gt;</span><span class="p">{});</span>
+            <span class="n">it</span> <span class="o">=</span> <span class="n">m</span><span class="p">.</span><span class="n">groupedtweets</span><span class="p">.</span><span class="n">insert</span><span class="p">(</span><span class="n">make_pair</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="n">make_shared</span><span class="o">&lt;</span><span class="n">TweetGroup</span><span class="o">&gt;</span><span class="p">())).</span><span class="n">first</span><span class="p">;</span>
+        <span class="p">}</span>
+
+        <span class="k">if</span> <span class="p">(</span><span class="o">!!</span><span class="n">tw</span><span class="p">)</span> <span class="p">{</span>
+            <span class="k">if</span> <span class="p">(</span><span class="n">searchbegin</span><span class="o">+</span><span class="n">offset</span> <span class="o">&lt;=</span> <span class="n">timestamp</span> <span class="o">&amp;&amp;</span> <span class="n">timestamp</span> <span class="o">&lt;</span> <span class="n">searchbegin</span><span class="o">+</span><span class="n">offset</span><span class="o">+</span><span class="n">length</span><span class="p">)</span> <span class="p">{</span>
+                <span class="n">it</span><span class="o">-&gt;</span><span class="n">second</span><span class="o">-&gt;</span><span class="n">tweets</span><span class="p">.</span><span class="n">push_back</span><span class="p">(</span><span class="n">tw</span><span class="p">);</span>
+
+                <span class="k">for</span> <span class="p">(</span><span class="k">auto</span><span class="o">&amp;</span> <span class="n">word</span><span class="o">:</span> <span class="n">words</span><span class="p">)</span> <span class="p">{</span>
+                    <span class="o">++</span><span class="n">it</span><span class="o">-&gt;</span><span class="n">second</span><span class="o">-&gt;</span><span class="n">words</span><span class="p">[</span><span class="n">word</span><span class="p">];</span>
+                <span class="p">}</span>
+            <span class="p">}</span>
+        <span class="p">}</span>
+    <span class="p">}</span>
+
+    <span class="k">while</span><span class="p">(</span><span class="o">!</span><span class="n">m</span><span class="p">.</span><span class="n">groups</span><span class="p">.</span><span class="n">empty</span><span class="p">()</span> <span class="o">&amp;&amp;</span> <span class="n">m</span><span class="p">.</span><span class="n">groups</span><span class="p">.</span><span class="n">front</span><span class="p">().</span><span class="n">begin</span> <span class="o">+</span> <span class="n">keep</span> <span class="o">&lt;</span> <span class="n">m</span><span class="p">.</span><span class="n">groups</span><span class="p">.</span><span class="n">back</span><span class="p">().</span><span class="n">begin</span><span class="p">)</span> <span class="p">{</span>
+        <span class="c1">// remove group
+</span>        <span class="n">m</span><span class="p">.</span><span class="n">groupedtweets</span><span class="p">.</span><span class="n">erase</span><span class="p">(</span><span class="n">m</span><span class="p">.</span><span class="n">groups</span><span class="p">.</span><span class="n">front</span><span class="p">());</span>
+        <span class="n">m</span><span class="p">.</span><span class="n">groups</span><span class="p">.</span><span class="n">pop_front</span><span class="p">();</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+
+</code></pre>
+</div>
+
+<h2 id="mesmerising">mesmerising</h2>
+
+<p>This app is mesmerising. I keep it running all day and night. I pull out my laptop when visiting friends and family and just let it run. I keep finding things out by watching the app that only appear on my other information feeds later. I have been adding additional filter functionality that allows me to focus on a trending topic and leapfrog into a deeper understanding of the current moment.</p>
+
+<h2 id="more-on-this-application">more on this application</h2>
+<p><a href="/2016/12/04/realtime_analysis_using_the_twitter_stream_api.html">Realtime analysis using the twitter stream API</a></p>
+
+  </article>
+
+</div>
+
+      </div>
+    </div>
+
+    <footer class="site-footer">
+
+  <div class="wrapper">
+
+    <h2 class="footer-heading">Fictional Memory</h2>
+
+    <div class="footer-col-wrapper">
+      <div class="footer-col  footer-col-1">
+        <ul class="contact-list">
+          <li>Fictional Memory</li>
+          <li><a href="mailto:kirk.shoop@gmail.com">kirk.shoop@gmail.com</a></li>
+        </ul>
+      </div>
+
+      <div class="footer-col  footer-col-2">
+        <ul class="social-media-list">
+          
+          <li>
+            <a href="https://github.com/kirkshoop">
+              <span class="icon  icon--github">
+                <svg viewbox="0 0 16 16">
+                  <path fill="#828282" d="M7.999,0.431c-4.285,0-7.76,3.474-7.76,7.761 c0,3.428,2.223,6.337,5.307,7.363c0.388,0.071,0.53-0.168,0.53-0.374c0-0.184-0.007-0.672-0.01-1.32 c-2.159,0.469-2.614-1.04-2.614-1.04c-0.353-0.896-0.862-1.135-0.862-1.135c-0.705-0.481,0.053-0.472,0.053-0.472 c0.779,0.055,1.189,0.8,1.189,0.8c0.692,1.186,1.816,0.843,2.258,0.645c0.071-0.502,0.271-0.843,0.493-1.037 C4.86,11.425,3.049,10.76,3.049,7.786c0-0.847,0.302-1.54,0.799-2.082C3.768,5.507,3.501,4.718,3.924,3.65 c0,0,0.652-0.209,2.134,0.796C6.677,4.273,7.34,4.187,8,4.184c0.659,0.003,1.323,0.089,1.943,0.261 c1.482-1.004,2.132-0.796,2.132-0.796c0.423,1.068,0.157,1.857,0.077,2.054c0.497,0.542,0.798,1.235,0.798,2.082 c0,2.981-1.814,3.637-3.543,3.829c0.279,0.24,0.527,0.713,0.527,1.437c0,1.037-0.01,1.874-0.01,2.129 c0,0.208,0.14,0.449,0.534,0.373c3.081-1.028,5.302-3.935,5.302-7.362C15.76,3.906,12.285,0.431,7.999,0.431z"></path>
+                </svg>
+              </span>
+
+              <span class="username">kirkshoop</span>
+            </a>
+          </li>
+          
+
+          
+          <li>
+            <a href="https://twitter.com/kirkshoop">
+              <span class="icon  icon--twitter">
+                <svg viewbox="0 0 16 16">
+                  <path fill="#828282" d="M15.969,3.058c-0.586,0.26-1.217,0.436-1.878,0.515c0.675-0.405,1.194-1.045,1.438-1.809
+                  c-0.632,0.375-1.332,0.647-2.076,0.793c-0.596-0.636-1.446-1.033-2.387-1.033c-1.806,0-3.27,1.464-3.27,3.27 c0,0.256,0.029,0.506,0.085,0.745C5.163,5.404,2.753,4.102,1.14,2.124C0.859,2.607,0.698,3.168,0.698,3.767 c0,1.134,0.577,2.135,1.455,2.722C1.616,6.472,1.112,6.325,0.671,6.08c0,0.014,0,0.027,0,0.041c0,1.584,1.127,2.906,2.623,3.206 C3.02,9.402,2.731,9.442,2.433,9.442c-0.211,0-0.416-0.021-0.615-0.059c0.416,1.299,1.624,2.245,3.055,2.271 c-1.119,0.877-2.529,1.4-4.061,1.4c-0.264,0-0.524-0.015-0.78-0.046c1.447,0.928,3.166,1.469,5.013,1.469 c6.015,0,9.304-4.983,9.304-9.304c0-0.142-0.003-0.283-0.009-0.423C14.976,4.29,15.531,3.714,15.969,3.058z"></path>
+                </svg>
+              </span>
+
+              <span class="username">kirkshoop</span>
+            </a>
+          </li>
+          
+        </ul>
+      </div>
+
+      <div class="footer-col  footer-col-3">
+        <p class="text">an intersection of C++ and Win32
+</p>
+      </div>
+    </div>
+
+  </div>
+
+</footer>
+
+
+  </body>
+
+</html>

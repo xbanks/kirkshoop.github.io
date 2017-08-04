@@ -1,0 +1,340 @@
+<!DOCTYPE html>
+<html>
+
+  <head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width initial-scale=1">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+
+    <title>Using an AzureML Webservice to get Sentiment</title>
+    <meta name="description" content="an intersection of C++ and Win32
+">
+
+    <link rel="stylesheet" href="/css/main.css">
+    <link rel="canonical" href="http://kirkshoop.github.io/2017/01/13/using_an_azureml_webservice_to_get_sentiment.html">
+
+    <script>
+      ((window.gitter = {}).chat = {}).options = {
+        room: 'kirkshoop/kirkshoop.github.io'
+      };
+    </script>
+    <script src="https://sidecar.gitter.im/dist/sidecar.v1.js" async defer></script>
+</head>
+
+  <script>
+  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+  })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+  ga('create', 'UA-60804833-1', 'auto');
+  ga('send', 'pageview');
+
+</script>
+
+
+  <body>
+
+    <header class="site-header">
+
+  <div class="wrapper">
+
+    <div class="site-title">
+      <img src="//www.gravatar.com/avatar/346d7c46fffb46511dfea6faa3e51937?s=48">
+      <a href="/">Fictional Memory</a>
+    </div>
+
+    <nav class="site-nav">
+      <a href="#" class="menu-icon">
+        <svg viewbox="0 0 18 15">
+          <path fill="#424242" d="M18,1.484c0,0.82-0.665,1.484-1.484,1.484H1.484C0.665,2.969,0,2.304,0,1.484l0,0C0,0.665,0.665,0,1.484,0 h15.031C17.335,0,18,0.665,18,1.484L18,1.484z"></path>
+          <path fill="#424242" d="M18,7.516C18,8.335,17.335,9,16.516,9H1.484C0.665,9,0,8.335,0,7.516l0,0c0-0.82,0.665-1.484,1.484-1.484 h15.031C17.335,6.031,18,6.696,18,7.516L18,7.516z"></path>
+          <path fill="#424242" d="M18,13.516C18,14.335,17.335,15,16.516,15H1.484C0.665,15,0,14.335,0,13.516l0,0 c0-0.82,0.665-1.484,1.484-1.484h15.031C17.335,12.031,18,12.696,18,13.516L18,13.516z"></path>
+        </svg>
+      </a>
+
+      <div class="trigger">
+        
+          
+          <a class="page-link" href="/about/">About</a>
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+      </div>
+    </nav>
+
+  </div>
+
+</header>
+
+
+    <div class="page-content">
+      <div class="wrapper">
+        <div class="post">
+
+  <header class="post-header">
+    <h1 class="post-title">Using an AzureML Webservice to get Sentiment</h1>
+    <p class="post-meta">Jan 13, 2017</p>
+  </header>
+
+  <article class="post-content">
+    <p><a href="https://www.youtube.com/watch?v=QFcy-jQpvBg"><img src="/assets/twitter_analysis_president_elect.gif" alt="twitter for president-elect"></a>
+<a href="https://www.youtube.com/watch?v=QFcy-jQpvBg">youtube</a></p>
+
+<h2 id="sentiment-analysis">Sentiment Analysis</h2>
+<p>Sentiment Analysis takes some text and evaluates whether the text is positive, negative or neutral in tone. Sentiment can be useful when evaluating tweets. Associating the sentiment of tweets to the words in those tweets will allow the app to show the history of positive vs. negative usage of each word.</p>
+
+<p>I spent some time looking for an easy way to add sentiment analysis via a C++ library. I did not find a solution for this.</p>
+
+<h2 id="azure-machine-learning">Azure Machine Learning</h2>
+<p>My team at Microsoft - Azure Machine Learning, has a sentiment analysis sample that can be used to train a model and then create a web service from the trained model. That web service can be used to analyze the sentiment in tweets.</p>
+
+<p>The Cortana Intelligence Gallery has this <a href="https://gallery.cortanaintelligence.com/Experiment/Binary-Classification-Twitter-sentiment-analysis-4">experiment</a>.</p>
+
+<blockquote>
+  <p>This experiment demonstrates the use of the <strong>Feature Hashing</strong>, <strong>Execute R Script</strong> and <strong>Filter-Based Feature Selection</strong> modules to train a sentiment analysis engine. We use a data-driven machine learning approach instead of a lexicon-based approach, as the latter is known to have high precision but low coverage compared to an approach that learns from a corpus of annotated tweets. The hashing features are used to train a model using the <strong>Two-Class Support Vector Machine (SVM)</strong>, and the trained model is used to predict the opinion polarity of unseen tweets.</p>
+</blockquote>
+
+<p>There is also a detailed explanation for how the sentiment model is built and the parameters used for the transforms and algorithms.</p>
+
+<p>To get a working web service, I used these two <a href="https://gallery.cortanaintelligence.com/Collection/Twitter-Sentiment-Analysis-Collection-1">experiments</a> that have been updated more recently.</p>
+
+<p>To get started, open <a href="https://gallery.cortanaintelligence.com/Experiment/Training-Experiment-for-Twitter-sentiment-analysis-2">Training Experiment for Twitter sentiment analysis</a> and click ‘Open in Studio’ link to add the training experiment into your Azure Machine Learning Workspace.
+<img src="/assets/twitter_sentiment_training.png" alt="training experiment in gallery"></p>
+
+<p>An Azure Machine Learning Workspace is require to use the experiment and create a web service. Paid and free Workspaces are available. 
+<img src="/assets/azureml_free_workspace.png" alt="azure ml free workspace"></p>
+
+<p>Once a workspace is created, the training experiment will be copied.
+<img src="/assets/azureml_copy_from_gallery.png" alt="azure ml copy from gallery"></p>
+
+<p>Now the training experiment must be Run to train the model.
+<img src="/assets/twitter_run_training.png" alt="run twitter training experiment"></p>
+
+<p>After the run is complete, the results must be saved in to the Workspace.</p>
+
+<ul>
+  <li>first result Right+Click the ‘Train Model’ node and select ‘Trained Model’ &gt; ‘Save As Trained Model’</li>
+  <li>second result Right+Click the ‘Select Columns Transform’ node and select ‘Columns selection transformation’ &gt; ‘Save As Transform’</li>
+</ul>
+
+<p>To get started, open <a href="https://gallery.cortanaintelligence.com/Experiment/Predictive-Experiment-for-Twitter-sentiment-analysis-3">Predictive Experiment for Twitter sentiment analysis</a> and click ‘Open in Studio’ link to add the predictive experiment into your Azure Machine Learning Workspace.</p>
+
+<p>Just like before, the first step is to run the predictive experiment.</p>
+
+<p>When the run is finished, deploy to a ‘Classic’ web service.
+<img src="/assets/twitter_deploy_webservice.png" alt="deploy twitter web service"></p>
+
+<p>When the deploy is finished, navigate to the preview management portal.
+<img src="/assets/twitter_webservice_preview.png" alt="twitter web service preview"></p>
+
+<p>The key and request response url must be copied into the twitter app settings.
+<img src="/assets/twitter_webservice_consume.png" alt="twitter web service consumption"></p>
+
+<h2 id="calling-the-web-service">Calling the web service</h2>
+
+<p>The web service expects an http POST request with an Authorization header and a json body.</p>
+
+<p>This function sets the headers and builds the json body, then makes the http request. When the request completes, the response is returned as a string.</p>
+
+<div class="language-cpp highlighter-rouge">
+<pre class="highlight"><code><span class="k">auto</span> <span class="n">sentimentrequest</span> <span class="o">=</span> <span class="p">[](</span><span class="n">observe_on_one_worker</span> <span class="n">worker</span><span class="p">,</span> <span class="o">::</span><span class="n">rxcurl</span><span class="o">::</span><span class="n">rxcurl</span> <span class="n">factory</span><span class="p">,</span> <span class="n">string</span> <span class="n">url</span><span class="p">,</span> <span class="n">string</span> <span class="n">key</span><span class="p">,</span> <span class="n">vector</span><span class="o">&lt;</span><span class="n">string</span><span class="o">&gt;</span> <span class="n">text</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">observable</span><span class="o">&lt;</span><span class="n">string</span><span class="o">&gt;</span> <span class="p">{</span>
+
+    <span class="n">std</span><span class="o">::</span><span class="n">map</span><span class="o">&lt;</span><span class="n">string</span><span class="p">,</span> <span class="n">string</span><span class="o">&gt;</span> <span class="n">headers</span><span class="p">;</span>
+    <span class="n">headers</span><span class="p">[</span><span class="s">"Content-Type"</span><span class="p">]</span> <span class="o">=</span> <span class="s">"application/json"</span><span class="p">;</span>
+    <span class="n">headers</span><span class="p">[</span><span class="s">"Authorization"</span><span class="p">]</span> <span class="o">=</span> <span class="s">"Bearer "</span> <span class="o">+</span> <span class="n">key</span><span class="p">;</span>
+
+    <span class="k">auto</span> <span class="n">body</span> <span class="o">=</span> <span class="n">json</span><span class="o">::</span><span class="n">parse</span><span class="p">(</span><span class="s">R"({"Inputs":{"input1":[]},"GlobalParameters":{}})"</span><span class="p">);</span>
+
+    <span class="k">static</span> <span class="k">const</span> <span class="n">regex</span> <span class="n">nonascii</span><span class="p">(</span><span class="s">R"([^A-Za-z0-9])"</span><span class="p">);</span>
+
+    <span class="k">auto</span><span class="o">&amp;</span> <span class="n">input1</span> <span class="o">=</span> <span class="n">body</span><span class="p">[</span><span class="s">"Inputs"</span><span class="p">][</span><span class="s">"input1"</span><span class="p">];</span>
+    <span class="k">for</span><span class="p">(</span><span class="k">auto</span><span class="o">&amp;</span> <span class="n">t</span> <span class="o">:</span> <span class="n">text</span><span class="p">)</span> <span class="p">{</span>
+
+        <span class="k">auto</span> <span class="n">ascii</span> <span class="o">=</span> <span class="n">regex_replace</span><span class="p">(</span><span class="n">t</span><span class="p">,</span> <span class="n">nonascii</span><span class="p">,</span> <span class="s">" "</span><span class="p">);</span>
+
+        <span class="n">input1</span><span class="p">.</span><span class="n">push_back</span><span class="p">({</span> <span class="p">{</span><span class="s">"tweet_text"</span><span class="p">,</span> <span class="n">ascii</span><span class="p">}</span> <span class="p">});</span>
+    <span class="p">}</span>
+
+    <span class="k">return</span> <span class="n">observable</span><span class="o">&lt;&gt;::</span><span class="n">defer</span><span class="p">([</span><span class="o">=</span><span class="p">]()</span> <span class="o">-&gt;</span> <span class="n">observable</span><span class="o">&lt;</span><span class="n">string</span><span class="o">&gt;</span> <span class="p">{</span>
+        <span class="k">return</span> <span class="n">factory</span><span class="p">.</span><span class="n">create</span><span class="p">(</span><span class="n">http_request</span><span class="p">{</span><span class="n">url</span><span class="p">,</span> <span class="s">"POST"</span><span class="p">,</span> <span class="n">headers</span><span class="p">,</span> <span class="n">body</span><span class="p">.</span><span class="n">dump</span><span class="p">()})</span> <span class="o">|</span>
+            <span class="n">rxo</span><span class="o">::</span><span class="n">map</span><span class="p">([](</span><span class="n">http_response</span> <span class="n">r</span><span class="p">){</span>
+                <span class="k">return</span> <span class="n">r</span><span class="p">.</span><span class="n">body</span><span class="p">.</span><span class="n">complete</span><span class="p">;</span>
+            <span class="p">})</span> <span class="o">|</span>
+            <span class="n">merge</span><span class="p">(</span><span class="n">worker</span><span class="p">)</span> <span class="o">|</span>
+            <span class="n">tap</span><span class="p">([</span><span class="o">=</span><span class="p">](</span><span class="n">exception_ptr</span><span class="p">){</span>
+                <span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="n">body</span> <span class="o">&lt;&lt;</span> <span class="n">endl</span><span class="p">;</span>
+            <span class="p">});</span>
+    <span class="p">})</span> <span class="o">|</span>
+    <span class="n">subscribe_on</span><span class="p">(</span><span class="n">worker</span><span class="p">);</span>
+<span class="p">};</span>
+</code></pre>
+</div>
+
+<h2 id="batching-calls-to-the-web-service">Batching calls to the web service</h2>
+
+<p>Making a separate http request per Tweet seems excessive. Thus, the twitter app will make calls for more than one tweet at a time.</p>
+
+<p>The following records Tweets into a vector for 500ms and then ignores empty vectors.</p>
+
+<div class="language-cpp highlighter-rouge">
+<pre class="highlight"><code><span class="n">buffer_with_time</span><span class="p">(</span><span class="n">milliseconds</span><span class="p">(</span><span class="mi">500</span><span class="p">),</span> <span class="n">tweetthread</span><span class="p">)</span> <span class="o">|</span>
+<span class="n">filter</span><span class="p">([](</span><span class="k">const</span> <span class="n">vector</span><span class="o">&lt;</span><span class="n">Tweet</span><span class="o">&gt;&amp;</span> <span class="n">tws</span><span class="p">){</span> <span class="k">return</span> <span class="o">!</span><span class="n">tws</span><span class="p">.</span><span class="n">empty</span><span class="p">();</span> <span class="p">})</span> <span class="o">|</span>
+</code></pre>
+</div>
+
+<p>This code uses Range-v3 on the vector to extract the text of each tweet.</p>
+
+<div class="language-cpp highlighter-rouge">
+<pre class="highlight"><code><span class="n">vector</span><span class="o">&lt;</span><span class="n">string</span><span class="o">&gt;</span> <span class="n">text</span> <span class="o">=</span> <span class="n">tws</span> <span class="o">|</span> 
+    <span class="n">ranges</span><span class="o">::</span><span class="n">view</span><span class="o">::</span><span class="n">transform</span><span class="p">([](</span><span class="n">Tweet</span> <span class="n">tw</span><span class="p">){</span>
+        <span class="k">auto</span><span class="o">&amp;</span> <span class="n">tweet</span> <span class="o">=</span> <span class="n">tw</span><span class="p">.</span><span class="n">data</span><span class="o">-&gt;</span><span class="n">tweet</span><span class="p">;</span>
+        <span class="k">return</span> <span class="n">tweettext</span><span class="p">(</span><span class="n">tweet</span><span class="p">);</span>
+    <span class="p">});</span>
+</code></pre>
+</div>
+
+<p>Now <code class="highlighter-rouge">sentimentrequest()</code> creates the http request to the web service.</p>
+
+<div class="language-cpp highlighter-rouge">
+<pre class="highlight"><code><span class="n">sentimentrequest</span><span class="p">(</span>
+    <span class="n">poolthread</span><span class="p">,</span> 
+    <span class="n">factory</span><span class="p">,</span> 
+    <span class="n">settings</span><span class="p">[</span><span class="s">"SentimentUrl"</span><span class="p">].</span><span class="n">get</span><span class="o">&lt;</span><span class="n">string</span><span class="o">&gt;</span><span class="p">(),</span> 
+    <span class="n">settings</span><span class="p">[</span><span class="s">"SentimentKey"</span><span class="p">].</span><span class="n">get</span><span class="o">&lt;</span><span class="n">string</span><span class="o">&gt;</span><span class="p">(),</span> 
+    <span class="n">text</span><span class="p">)</span> <span class="o">|</span>
+</code></pre>
+</div>
+
+<p>Use Range-v3 on the http response to pair up each Tweet with its sentiment.</p>
+
+<div class="language-cpp highlighter-rouge">
+<pre class="highlight"><code><span class="k">auto</span> <span class="n">combined</span> <span class="o">=</span> <span class="n">ranges</span><span class="o">::</span><span class="n">view</span><span class="o">::</span><span class="n">zip</span><span class="p">(</span><span class="n">response</span><span class="p">[</span><span class="s">"Results"</span><span class="p">][</span><span class="s">"output1"</span><span class="p">],</span> <span class="n">tws</span><span class="p">);</span>
+</code></pre>
+</div>
+
+<p>putting it all together</p>
+
+<div class="language-cpp highlighter-rouge">
+<pre class="highlight"><code><span class="n">reducers</span><span class="p">.</span><span class="n">push_back</span><span class="p">(</span>
+    <span class="n">ts</span> <span class="o">|</span>
+    <span class="n">onlytweets</span><span class="p">()</span> <span class="o">|</span>
+    <span class="n">buffer_with_time</span><span class="p">(</span><span class="n">milliseconds</span><span class="p">(</span><span class="mi">500</span><span class="p">),</span> <span class="n">tweetthread</span><span class="p">)</span> <span class="o">|</span>
+    <span class="n">filter</span><span class="p">([](</span><span class="k">const</span> <span class="n">vector</span><span class="o">&lt;</span><span class="n">Tweet</span><span class="o">&gt;&amp;</span> <span class="n">tws</span><span class="p">){</span> <span class="k">return</span> <span class="o">!</span><span class="n">tws</span><span class="p">.</span><span class="n">empty</span><span class="p">();</span> <span class="p">})</span> <span class="o">|</span>
+    <span class="n">rxo</span><span class="o">::</span><span class="n">map</span><span class="p">([</span><span class="o">=</span><span class="p">](</span><span class="k">const</span> <span class="n">vector</span><span class="o">&lt;</span><span class="n">Tweet</span><span class="o">&gt;&amp;</span> <span class="n">tws</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">observable</span><span class="o">&lt;</span><span class="n">Reducer</span><span class="o">&gt;</span> <span class="p">{</span>
+        <span class="n">vector</span><span class="o">&lt;</span><span class="n">string</span><span class="o">&gt;</span> <span class="n">text</span> <span class="o">=</span> <span class="n">tws</span> <span class="o">|</span> 
+            <span class="n">ranges</span><span class="o">::</span><span class="n">view</span><span class="o">::</span><span class="n">transform</span><span class="p">([](</span><span class="n">Tweet</span> <span class="n">tw</span><span class="p">){</span>
+                <span class="k">auto</span><span class="o">&amp;</span> <span class="n">tweet</span> <span class="o">=</span> <span class="n">tw</span><span class="p">.</span><span class="n">data</span><span class="o">-&gt;</span><span class="n">tweet</span><span class="p">;</span>
+                <span class="k">return</span> <span class="n">tweettext</span><span class="p">(</span><span class="n">tweet</span><span class="p">);</span>
+            <span class="p">});</span>
+        <span class="k">return</span> <span class="n">sentimentrequest</span><span class="p">(</span><span class="n">poolthread</span><span class="p">,</span> <span class="n">factory</span><span class="p">,</span> <span class="n">settings</span><span class="p">[</span><span class="s">"SentimentUrl"</span><span class="p">].</span><span class="n">get</span><span class="o">&lt;</span><span class="n">string</span><span class="o">&gt;</span><span class="p">(),</span> <span class="n">settings</span><span class="p">[</span><span class="s">"SentimentKey"</span><span class="p">].</span><span class="n">get</span><span class="o">&lt;</span><span class="n">string</span><span class="o">&gt;</span><span class="p">(),</span> <span class="n">text</span><span class="p">)</span> <span class="o">|</span>
+            <span class="n">rxo</span><span class="o">::</span><span class="n">map</span><span class="p">([</span><span class="o">=</span><span class="p">](</span><span class="k">const</span> <span class="n">string</span><span class="o">&amp;</span> <span class="n">body</span><span class="p">){</span>
+                <span class="k">auto</span> <span class="n">response</span> <span class="o">=</span> <span class="n">json</span><span class="o">::</span><span class="n">parse</span><span class="p">(</span><span class="n">body</span><span class="p">);</span>
+                <span class="k">return</span> <span class="n">Reducer</span><span class="p">([</span><span class="o">=</span><span class="p">](</span><span class="n">Model</span><span class="o">&amp;</span> <span class="n">m</span><span class="p">){</span>
+                    <span class="k">auto</span> <span class="n">combined</span> <span class="o">=</span> <span class="n">ranges</span><span class="o">::</span><span class="n">view</span><span class="o">::</span><span class="n">zip</span><span class="p">(</span><span class="n">response</span><span class="p">[</span><span class="s">"Results"</span><span class="p">][</span><span class="s">"output1"</span><span class="p">],</span> <span class="n">tws</span><span class="p">);</span>
+                    <span class="k">for</span> <span class="p">(</span><span class="k">const</span> <span class="k">auto</span><span class="o">&amp;</span> <span class="n">b</span> <span class="o">:</span> <span class="n">combined</span><span class="p">)</span> <span class="p">{</span>
+                        <span class="k">auto</span> <span class="n">sentiment</span> <span class="o">=</span> <span class="n">get</span><span class="o">&lt;</span><span class="mi">0</span><span class="o">&gt;</span><span class="p">(</span><span class="n">b</span><span class="p">);</span>
+                        <span class="k">auto</span> <span class="n">tweet</span> <span class="o">=</span> <span class="n">get</span><span class="o">&lt;</span><span class="mi">1</span><span class="o">&gt;</span><span class="p">(</span><span class="n">b</span><span class="p">).</span><span class="n">data</span><span class="o">-&gt;</span><span class="n">tweet</span><span class="p">;</span>
+                        <span class="n">m</span><span class="p">.</span><span class="n">data</span><span class="o">-&gt;</span><span class="n">sentiment</span><span class="p">[</span><span class="n">tweet</span><span class="p">[</span><span class="s">"id_str"</span><span class="p">]]</span> <span class="o">=</span> <span class="n">sentiment</span><span class="p">[</span><span class="s">"Sentiment"</span><span class="p">];</span>
+                    <span class="p">}</span>
+                    <span class="k">return</span> <span class="n">std</span><span class="o">::</span><span class="n">move</span><span class="p">(</span><span class="n">m</span><span class="p">);</span>
+                <span class="p">});</span>
+            <span class="p">});</span>
+    <span class="p">})</span> <span class="o">|</span>
+    <span class="n">merge</span><span class="p">(</span><span class="n">poolthread</span><span class="p">)</span> <span class="o">|</span>
+    <span class="n">nooponerror</span><span class="p">()</span> <span class="o">|</span>
+    <span class="n">start_with</span><span class="p">(</span><span class="n">noop</span><span class="p">));</span>
+</code></pre>
+</div>
+
+<h2 id="composition">composition</h2>
+
+<p>There was very little code to write to create a new http request for all the Tweets that arrived in a 500ms window and then split the sentiment results out and pair them with the Tweet.</p>
+
+<p>The result is that the Tweets are displayed when they arrive and then marked with the sentiment when it arrives later. The effect is quite pleasing to watch.</p>
+
+<p><img src="/assets/twitter_sentiment.gif" alt="tweets with sentiment"></p>
+
+<p>rxcpp provided an easy way to express the coordination between the arriving tweets and the arriving sentiments and Range-v3 provided an easy way to manipulate the vectors. Each contributed a powerful abstraction that made a complex problem easy.</p>
+
+<h2 id="more-on-this-application">more on this application</h2>
+<p><a href="/2016/12/04/realtime_analysis_using_the_twitter_stream_api.html">Realtime analysis using the twitter stream API</a></p>
+
+  </article>
+
+</div>
+
+      </div>
+    </div>
+
+    <footer class="site-footer">
+
+  <div class="wrapper">
+
+    <h2 class="footer-heading">Fictional Memory</h2>
+
+    <div class="footer-col-wrapper">
+      <div class="footer-col  footer-col-1">
+        <ul class="contact-list">
+          <li>Fictional Memory</li>
+          <li><a href="mailto:kirk.shoop@gmail.com">kirk.shoop@gmail.com</a></li>
+        </ul>
+      </div>
+
+      <div class="footer-col  footer-col-2">
+        <ul class="social-media-list">
+          
+          <li>
+            <a href="https://github.com/kirkshoop">
+              <span class="icon  icon--github">
+                <svg viewbox="0 0 16 16">
+                  <path fill="#828282" d="M7.999,0.431c-4.285,0-7.76,3.474-7.76,7.761 c0,3.428,2.223,6.337,5.307,7.363c0.388,0.071,0.53-0.168,0.53-0.374c0-0.184-0.007-0.672-0.01-1.32 c-2.159,0.469-2.614-1.04-2.614-1.04c-0.353-0.896-0.862-1.135-0.862-1.135c-0.705-0.481,0.053-0.472,0.053-0.472 c0.779,0.055,1.189,0.8,1.189,0.8c0.692,1.186,1.816,0.843,2.258,0.645c0.071-0.502,0.271-0.843,0.493-1.037 C4.86,11.425,3.049,10.76,3.049,7.786c0-0.847,0.302-1.54,0.799-2.082C3.768,5.507,3.501,4.718,3.924,3.65 c0,0,0.652-0.209,2.134,0.796C6.677,4.273,7.34,4.187,8,4.184c0.659,0.003,1.323,0.089,1.943,0.261 c1.482-1.004,2.132-0.796,2.132-0.796c0.423,1.068,0.157,1.857,0.077,2.054c0.497,0.542,0.798,1.235,0.798,2.082 c0,2.981-1.814,3.637-3.543,3.829c0.279,0.24,0.527,0.713,0.527,1.437c0,1.037-0.01,1.874-0.01,2.129 c0,0.208,0.14,0.449,0.534,0.373c3.081-1.028,5.302-3.935,5.302-7.362C15.76,3.906,12.285,0.431,7.999,0.431z"></path>
+                </svg>
+              </span>
+
+              <span class="username">kirkshoop</span>
+            </a>
+          </li>
+          
+
+          
+          <li>
+            <a href="https://twitter.com/kirkshoop">
+              <span class="icon  icon--twitter">
+                <svg viewbox="0 0 16 16">
+                  <path fill="#828282" d="M15.969,3.058c-0.586,0.26-1.217,0.436-1.878,0.515c0.675-0.405,1.194-1.045,1.438-1.809
+                  c-0.632,0.375-1.332,0.647-2.076,0.793c-0.596-0.636-1.446-1.033-2.387-1.033c-1.806,0-3.27,1.464-3.27,3.27 c0,0.256,0.029,0.506,0.085,0.745C5.163,5.404,2.753,4.102,1.14,2.124C0.859,2.607,0.698,3.168,0.698,3.767 c0,1.134,0.577,2.135,1.455,2.722C1.616,6.472,1.112,6.325,0.671,6.08c0,0.014,0,0.027,0,0.041c0,1.584,1.127,2.906,2.623,3.206 C3.02,9.402,2.731,9.442,2.433,9.442c-0.211,0-0.416-0.021-0.615-0.059c0.416,1.299,1.624,2.245,3.055,2.271 c-1.119,0.877-2.529,1.4-4.061,1.4c-0.264,0-0.524-0.015-0.78-0.046c1.447,0.928,3.166,1.469,5.013,1.469 c6.015,0,9.304-4.983,9.304-9.304c0-0.142-0.003-0.283-0.009-0.423C14.976,4.29,15.531,3.714,15.969,3.058z"></path>
+                </svg>
+              </span>
+
+              <span class="username">kirkshoop</span>
+            </a>
+          </li>
+          
+        </ul>
+      </div>
+
+      <div class="footer-col  footer-col-3">
+        <p class="text">an intersection of C++ and Win32
+</p>
+      </div>
+    </div>
+
+  </div>
+
+</footer>
+
+
+  </body>
+
+</html>
