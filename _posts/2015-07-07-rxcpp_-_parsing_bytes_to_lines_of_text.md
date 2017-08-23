@@ -11,7 +11,7 @@ I answered a question on [StackOverflow](http://stackoverflow.com/questions/3120
 #the question
 given a source that sends chunks of bytes, how to produce a string for each line using `\r` as the end-of-line delimiter?
 
-####given
+#### given
 
 ```sh
 [ 66 66 66 66 66 66 66 66 66 66 66 66 66 66 66 66 66 ] 
@@ -23,7 +23,7 @@ given a source that sends chunks of bytes, how to produce a string for each line
 [ 75 75 75 75 75 75 75 13 ] 
 ```
 
-####expect
+#### expect
 
 ```sh
 BBBBBBBBBBBBBBBBB
@@ -38,7 +38,7 @@ JJJJJJJ
 KKKKKKKK
 ```
 
-#the answer
+# the answer
 There are only three steps in the answer;
 
   1. split on `\r`
@@ -47,7 +47,7 @@ There are only three steps in the answer;
 
 The code is on [github](https://github.com/Reactive-Extensions/RxCpp/commit/a156c1abf553c9eb9efdb7654b748461c1b298c8)
 
-####create strings split on `\r`
+#### create strings split on `\r`
 The first step uses regex and token_iterator to split each vector into N strings. 
 
 ```cpp
@@ -84,7 +84,7 @@ Now create a separate observable for each line. In the C# answer I used Window, 
             [](string& s) { return move(s);});
 ```
 
-####reduce the strings for a line into one string
+#### reduce the strings for a line into one string
 sum is used to add the strings that form each line together. sum will throw if a line is empty, but in this example there are no empty lines. 
 
 ```cpp
@@ -95,14 +95,14 @@ sum is used to add the strings that form each line together. sum will throw if a
         merge();
 ```
 
-####print result
+#### print result
 
 ```cpp
     lines.
         subscribe(println(cout));
 ```
 
-####test source of byte chunks
+#### test source of byte chunks
 To test this I used the following generator (and made sure that it did not produce empty lines)
 
 ```cpp
@@ -138,7 +138,7 @@ To test this I used the following generator (and made sure that it did not produ
         });
 ```
 
-#bonus
+# bonus
 rxcpp is becoming more friendly when the global namespace has been polluted with the std namespace (`using namespace std;`). The code in this example works with the following setup.
 
 ```cpp
